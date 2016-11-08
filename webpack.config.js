@@ -22,7 +22,7 @@ if (PROD) {
 }
 
 module.exports = {
-    devtool: PROD ? 'source-map' : 'eval',
+    devtool: 'source-map',
     entry: {
         app: './src/index.js'
     },
@@ -39,8 +39,9 @@ module.exports = {
         }),
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: `"${process.env.NODE_ENV}"`
-            }
+                NODE_ENV: `"${process.env.NODE_ENV}"`,
+                BROWSER: true
+            },
         })
     ]),
     module: {
@@ -50,6 +51,7 @@ module.exports = {
             exclude: /node_modules/,
             query: {
                 presets: ['es2015'],
+                plugins: ['transform-class-properties'],
                 cacheDirectory: true
             }
         }]
