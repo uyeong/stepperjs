@@ -8,7 +8,7 @@ class Stepper {
      * @param {Object} options
      * @example
      * import Stepper from 'stepperjs';
-     * import linear from 'stepperjs/easings/linear';
+     * import linear from 'stepperjs/dist/easings/linear';
      *
      * const stepper = new Stepper();
      *
