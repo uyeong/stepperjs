@@ -33,9 +33,9 @@ class Stepper {
             return;
         }
 
-        const end = Date.now() + duration;
+        const end = (+new Date()) + duration;
         const stepping = () => {
-            const remaining = end - Date.now();
+            const remaining = end - (+new Date());
             const time = remaining / duration;
 
             if (remaining < 0) {

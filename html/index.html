@@ -2,15 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Demo - StepperJS</title>
+    <style>
+        body,html{font-family:'Apple SD Gothic Neo',AppleSDGothicNeo-Regular,'맑은 고딕','Malgun Gothic','돋움',dotum,AppleGothic,sans-serif,'굴림',Gulim,Helvetica;font-size:1em;padding:0;margin:0}
+        .section{margin-top:20px}
+        .wrapper{padding:20px}
+        .animation{width:100%;height:80px;border:1px solid #000;font-size:.75rem}
+        .animation__inner{position:relative;width:100%;height:100%;overflow:hidden;transform:translate3d(0,0,0)}
+        .animation__target{position:absolute;width:80px;height:80px;background:#000;left:0;-webkit-will-change:left;-moz-will-change:left;will-change:left}
+        .animation__target span{display:inline-block;text-align:center;padding:26px 0;color:#FFF}
+        .controller__switch{display:inline-block;margin:10px 10px 0 0}
+        .console__inner textarea{width:100%;padding:10px;box-sizing:border-box}
+    </style>
 </head>
 <body>
+<div class="wrapper">
+    <h1>StepperJS</h1>
+    <div class="section animation">
+        <div class="animation__inner">
+            <div class="animation__target">
+                <span>Animation target</span>
+            </div>
+        </div>
+    </div>
+    <div class="section controller">
+        <div class="controller__inner">
+            <div class="controller__switch">
+                <label>
+                    <span>Duration</span><br/>
+                    <input type="number" name="duration" value="1500"/>
+                </label>
+            </div>
+            <div class="controller__switch">
+                <label>
+                    <span>Easings</span><br/>
+                    <select name="easing"></select>
+                </label>
+            </div>
+            <div class="controller__switch">
+                <button class="button">Start</button>
+            </div>
+        </div>
+    </div>
+    <div class="section console">
+        <div class="console__inner">
+            <textarea name="console" cols="30" rows="10" readonly></textarea>
+        </div>
+    </div>
+</div>
 
 <script>
-    alert((new Stepper()).sayHello());
+    var stepper = new Stepper();
+    var elAnimationWrap = document.querySelector('.animation');
+    var elAnimationTarget = document.querySelector('.animation__target');
+    var elDurationInput = document.querySelector('input[name=duration]');
+    var elEasingSelect = document.querySelector('select[name=easing]');
+    var elConsoleArea = document.querySelector('textarea[name=console]');
+    var elStartButton = document.querySelector('.button');
+    var selectedEasing = 'linear';
+
+    function drawSelectOfEasingList() {
+        var option,
+            key;
+
+        for(key in Stepper.easings) {
+            option = document.createElement('option');
+            option.text = key;
+            option.value = key;
+
+            elEasingSelect.add(option, null);
+        }
+    }
+
+    function getEndlinePosition() {
+        var parentWidth = parseInt(window.getComputedStyle ? window.getComputedStyle(elAnimationWrap).width : elAnimationWrap.clientWidth, 10);
+        var targetWidth = parseInt(window.getComputedStyle ? window.getComputedStyle(elAnimationTarget).width : elAnimationTarget.clientWidth, 10);
+
+        return parentWidth - targetWidth;
+    }
+
+    function printLogging(message, clear) {
+        elConsoleArea.value = clear ? message + '\n' : elConsoleArea.value + message + '\n';
+        elConsoleArea.scrollTop = elConsoleArea.scrollHeight;
+    }
+
+    function attachControlEvents() {
+        if (elEasingSelect.addEventListener) {
+            elEasingSelect.addEventListener('change', onChangeEasingSelect);
+            elStartButton.addEventListener('click', onClickStartButton);
+        } else {
+            elEasingSelect.attachEvent('onchange', onChangeEasingSelect);
+            elStartButton.attachEvent('onclick', onClickStartButton);
+        }
+    }
+
+    function onChangeEasingSelect(event) {
+        selectedEasing = (event.currentTarget || event.srcElement).value;
+    }
+
+    function onClickStartButton() {
+        var duration = parseInt(elDurationInput.value, 10);
+        var endline = getEndlinePosition();
+
+         stepper.start({
+             duration: duration,
+             easing: Stepper.easings[selectedEasing],
+             start: function () {
+                 printLogging('', true);
+                 printLogging('Stepper Start');
+                 printLogging('  - Duration : ' + duration);
+                 printLogging('  - Easing : ' + selectedEasing);
+                 printLogging('----------------------');
+             },
+             doing: function (now) {
+                 var position = endline * now + 'px';
+
+                 elAnimationTarget.style.left = position;
+
+                 printLogging('now : ' + now);
+                 printLogging('left : ' + position);
+             },
+             ended: function () {
+                 elAnimationTarget.style.left = endline + 'px';
+
+                 printLogging('----------------------');
+                 printLogging('ended!!');
+             },
+         });
+    }
+
+    drawSelectOfEasingList();
+    attachControlEvents();
 </script>
 </body>
 </html>
