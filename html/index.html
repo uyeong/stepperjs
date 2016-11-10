@@ -42,7 +42,8 @@
                 </label>
             </div>
             <div class="controller__switch">
-                <button class="button">Start</button>
+                <button class="button controller__start-btn">Start</button>
+                <button class="button controller__stop-btn">Stop</button>
             </div>
         </div>
     </div>
@@ -60,7 +61,8 @@
     var elDurationInput = document.querySelector('input[name=duration]');
     var elEasingSelect = document.querySelector('select[name=easing]');
     var elConsoleArea = document.querySelector('textarea[name=console]');
-    var elStartButton = document.querySelector('.button');
+    var elStartButton = document.querySelector('.controller__start-btn');
+    var elStopButton = document.querySelector('.controller__stop-btn');
     var selectedEasing = 'linear';
 
     function drawSelectOfEasingList() {
@@ -89,12 +91,14 @@
     }
 
     function attachControlEvents() {
-        if (elEasingSelect.addEventListener) {
+        if (document.addEventListener) {
             elEasingSelect.addEventListener('change', onChangeEasingSelect);
             elStartButton.addEventListener('click', onClickStartButton);
+            elStopButton.addEventListener('click', onClickStopButton);
         } else {
             elEasingSelect.attachEvent('onchange', onChangeEasingSelect);
             elStartButton.attachEvent('onclick', onClickStartButton);
+            elStopButton.addEventListener('onclick', onClickStopButton);
         }
     }
 
@@ -130,7 +134,17 @@
                  printLogging('----------------------');
                  printLogging('ended!!');
              },
+             stopped: function () {
+                 elAnimationTarget.style.left = '0px';
+
+                 printLogging('----------------------');
+                 printLogging('stopped!!');
+             }
          });
+    }
+
+    function onClickStopButton() {
+        stepper.stop();
     }
 
     drawSelectOfEasingList();

@@ -2,6 +2,10 @@ import raf from 'raf';
 import linear from './easings/linear';
 
 class Stepper {
+    constructor() {
+        this.rafId = 0;
+        this.stopped = null;
+    }
 
     /**
      * Start a step of raf with easing.
@@ -17,7 +21,8 @@ class Stepper {
      *     easing: linear,
      *     start: () => ... ,
      *     doing: (n) => ... ,
-     *     ended: () => ...
+     *     ended: () => ... ,
+     *     stopped: () => ...
      * });
      */
     start(options = {}) {
@@ -26,7 +31,8 @@ class Stepper {
             easing = linear,
             start = () => {},
             doing = () => {},
-            ended = () => {}
+            ended = () => {},
+            stopped = () => {}
         } = options;
 
         if (!duration) {
@@ -40,15 +46,32 @@ class Stepper {
 
             if (remaining < 0) {
                 ended();
+                this.rafId = 0;
                 return;
             }
 
             doing(1 - easing(time));
-            raf(stepping);
+            this.rafId = raf(stepping);
         };
 
         start();
         stepping();
+
+        this.stopped = stopped;
+    }
+
+    stop() {
+        if (!this.rafId) {
+            return;
+        }
+
+        raf.cancel(this.rafId);
+
+        this.rafId = 0;
+
+        if (this.stopped) {
+            this.stopped();
+        }
     }
 }
 

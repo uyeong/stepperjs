@@ -25,8 +25,11 @@ stepper.start({
     easing: linear,
     start: () => ... ,
     doing: (n) => ... ,
-    ended: () => ...
+    ended: () => ... ,
+    stopped: () => ...
 });
+
+stepper.stop();
 ```
 
 for Browser
@@ -41,10 +44,13 @@ var stepper = new Stepper();
 stepper.start({
     duration: 300,
     easing: Stepper.easings.linear,
-    start: function () { ... } ,
-    doing: function (n) { ... } ,
-    ended: function () { ... }
+    start: function () { ... },
+    doing: function (n) { ... },
+    ended: function () { ... },
+    stopped: function () { ... }
 });
+
+stepper.stop();
 ```
 
 ## Supported browsers
