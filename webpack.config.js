@@ -13,7 +13,7 @@ if (PROD) {
         mangle: false,
         compress: {
             warnings: false,
-            screw_ie8: true
+            screw_ie8: false,
         },
         output: {
             comments: false
@@ -50,8 +50,12 @@ module.exports = {
             loader: 'babel-loader',
             exclude: /node_modules/,
             query: {
-                presets: ['es2015'],
-                plugins: ['transform-class-properties'],
+                presets: ['es2015-loose'],
+                plugins: [
+                    'transform-class-properties',
+                    'transform-es3-member-expression-literals',
+                    'transform-es3-property-literals'
+                ],
                 cacheDirectory: true
             }
         }]
