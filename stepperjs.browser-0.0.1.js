@@ -60,7 +60,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _Stepper2 = _interopRequireDefault(_Stepper);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	var easings = void 0;
 	
@@ -68,7 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    easings = __webpack_require__(6);
 	}
 	
-	module.exports = _Stepper2.default;
+	module.exports = _Stepper2['default'];
 	module.exports.easings = easings;
 
 /***/ },
@@ -77,11 +77,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	exports.__esModule = true;
 	
 	var _raf = __webpack_require__(2);
 	
@@ -91,77 +87,109 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _linear2 = _interopRequireDefault(_linear);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Stepper = function () {
 	    function Stepper() {
 	        _classCallCheck(this, Stepper);
+	
+	        this.rafId = 0;
+	        this.stopped = null;
 	    }
 	
-	    _createClass(Stepper, [{
-	        key: 'start',
+	    /**
+	     * Start a step of raf with easing.
+	     * @param {Object} options
+	     * @example
+	     * import Stepper from 'stepperjs';
+	     * import linear from 'stepperjs/dist/easings/linear';
+	     *
+	     * const stepper = new Stepper();
+	     *
+	     * stepper.start({
+	     *     duration: 300,
+	     *     easing: linear,
+	     *     loop: true,
+	     *     start: () => ... ,
+	     *     doing: (n) => ... ,
+	     *     ended: () => ... ,
+	     *     stopped: () => ...
+	     * });
+	     */
 	
 	
-	        /**
-	         * Start a step of raf with easing.
-	         * @param {Object} options
-	         * @example
-	         * import Stepper from 'stepperjs';
-	         * import linear from 'stepperjs/easings/linear';
-	         *
-	         * const stepper = new Stepper();
-	         *
-	         * stepper.start({
-	         *     duration: 300,
-	         *     easing: linear,
-	         *     start: () => ... ,
-	         *     doing: (n) => ... ,
-	         *     ended: () => ...
-	         * });
-	         */
-	        value: function start() {
-	            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	            var _options$duration = options.duration,
-	                duration = _options$duration === undefined ? 0 : _options$duration,
-	                _options$easing = options.easing,
-	                easing = _options$easing === undefined ? _linear2.default : _options$easing,
-	                _options$start = options.start,
-	                start = _options$start === undefined ? function () {} : _options$start,
-	                _options$doing = options.doing,
-	                doing = _options$doing === undefined ? function () {} : _options$doing,
-	                _options$ended = options.ended,
-	                ended = _options$ended === undefined ? function () {} : _options$ended;
+	    Stepper.prototype.start = function start() {
+	        var _this = this;
+	
+	        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	        var _options$duration = options.duration,
+	            duration = _options$duration === undefined ? 0 : _options$duration,
+	            _options$easing = options.easing,
+	            easing = _options$easing === undefined ? _linear2['default'] : _options$easing,
+	            _options$loop = options.loop,
+	            loop = _options$loop === undefined ? false : _options$loop,
+	            _options$start = options.start,
+	            start = _options$start === undefined ? function () {} : _options$start,
+	            _options$doing = options.doing,
+	            doing = _options$doing === undefined ? function () {} : _options$doing,
+	            _options$ended = options.ended,
+	            ended = _options$ended === undefined ? function () {} : _options$ended,
+	            _options$stopped = options.stopped,
+	            stopped = _options$stopped === undefined ? function () {} : _options$stopped;
 	
 	
-	            if (!duration) {
-	                return;
-	            }
+	        if (!duration) {
+	            return;
+	        }
 	
-	            var end = +new Date() + duration;
-	            var stepping = function stepping() {
-	                var remaining = end - +new Date();
-	                var time = remaining / duration;
+	        this.stopped = stopped;
 	
-	                if (remaining < 0) {
-	                    ended();
+	        if (this.rafId) {
+	            this.stop();
+	        }
+	
+	        var end = +new Date() + duration;
+	        var stepping = function stepping() {
+	            var remaining = end - +new Date();
+	            var time = remaining / duration;
+	
+	            if (remaining < 0) {
+	                ended();
+	                _this.rafId = 0;
+	                end = +new Date() + duration;
+	
+	                if (!loop) {
 	                    return;
 	                }
+	            }
 	
-	                doing(1 - easing(time));
-	                (0, _raf2.default)(stepping);
-	            };
+	            doing(1 - easing(time));
+	            _this.rafId = (0, _raf2['default'])(stepping);
+	        };
 	
-	            start();
-	            stepping();
+	        start();
+	        stepping();
+	    };
+	
+	    Stepper.prototype.stop = function stop() {
+	        if (!this.rafId) {
+	            return;
 	        }
-	    }]);
+	
+	        _raf2['default'].cancel(this.rafId);
+	        this.rafId = 0;
+	
+	        if (this.stopped) {
+	            this.stopped();
+	        }
+	    };
 	
 	    return Stepper;
 	}();
 	
-	exports.default = Stepper;
+	exports['default'] = Stepper;
 
 /***/ },
 /* 2 */
@@ -867,10 +895,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _outBounce2 = _interopRequireDefault(_outBounce);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function inBounce(n) {
-	    return 1 - (0, _outBounce2.default)(1 - n);
+	    return 1 - (0, _outBounce2['default'])(1 - n);
 	}
 	
 	module.exports = inBounce;
@@ -909,14 +937,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _outBounce2 = _interopRequireDefault(_outBounce);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function inOutBounce(n) {
 	    if (n < .5) {
-	        return (0, _inBounce2.default)(n * 2) * .5;
+	        return (0, _inBounce2['default'])(n * 2) * .5;
 	    }
 	
-	    return (0, _outBounce2.default)(n * 2 - 1) * .5 + .5;
+	    return (0, _outBounce2['default'])(n * 2 - 1) * .5 + .5;
 	}
 	
 	module.exports = inOutBounce;
@@ -1015,4 +1043,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=stepperjs.browser-0.0.0.js.map
+//# sourceMappingURL=stepperjs.browser-0.0.1.js.map
