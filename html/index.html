@@ -42,6 +42,15 @@
                 </label>
             </div>
             <div class="controller__switch">
+                <label>
+                    <span>Loop</span><br/>
+                    <select name="loop">
+                        <option value="0" selected>NO</option>
+                        <option value="1">YES</option>
+                    </select>
+                </label>
+            </div>
+            <div class="controller__switch">
                 <button class="button controller__start-btn">Start</button>
                 <button class="button controller__stop-btn">Stop</button>
             </div>
@@ -60,10 +69,12 @@
     var elAnimationTarget = document.querySelector('.animation__target');
     var elDurationInput = document.querySelector('input[name=duration]');
     var elEasingSelect = document.querySelector('select[name=easing]');
+    var elLoopSelect = document.querySelector('select[name=loop]');
     var elConsoleArea = document.querySelector('textarea[name=console]');
     var elStartButton = document.querySelector('.controller__start-btn');
     var elStopButton = document.querySelector('.controller__stop-btn');
     var selectedEasing = 'linear';
+    var selectedLoop = false;
 
     function drawSelectOfEasingList() {
         var option,
@@ -93,10 +104,12 @@
     function attachControlEvents() {
         if (document.addEventListener) {
             elEasingSelect.addEventListener('change', onChangeEasingSelect);
+            elLoopSelect.addEventListener('change', onChangeLoopSelect);
             elStartButton.addEventListener('click', onClickStartButton);
             elStopButton.addEventListener('click', onClickStopButton);
         } else {
             elEasingSelect.attachEvent('onchange', onChangeEasingSelect);
+            elLoopSelect.attachEvent('onchange', onChangeLoopSelect);
             elStartButton.attachEvent('onclick', onClickStartButton);
             elStopButton.addEventListener('onclick', onClickStopButton);
         }
@@ -106,6 +119,10 @@
         selectedEasing = (event.currentTarget || event.srcElement).value;
     }
 
+    function onChangeLoopSelect(event) {
+        selectedLoop = (event.currentTarget || event.srcElement).value === '1';
+    }
+
     function onClickStartButton() {
         var duration = parseInt(elDurationInput.value, 10);
         var endline = getEndlinePosition();
@@ -113,11 +130,13 @@
          stepper.start({
              duration: duration,
              easing: Stepper.easings[selectedEasing],
+             loop: selectedLoop,
              start: function () {
                  printLogging('', true);
                  printLogging('Stepper Start');
                  printLogging('  - Duration : ' + duration);
                  printLogging('  - Easing : ' + selectedEasing);
+                 printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
                  printLogging('----------------------');
              },
              doing: function (now) {

@@ -21,8 +21,9 @@ import linear from 'stepperjs/dist/easings/linear';
 const stepper = new Stepper();
 
 stepper.start({
-    duration: 300,
-    easing: linear,
+    duration: 300, // default: 0
+    easing: linear, // default: linear
+    loop: true, // default: false
     start: () => ... ,
     doing: (n) => ... ,
     ended: () => ... ,
@@ -44,6 +45,7 @@ var stepper = new Stepper();
 stepper.start({
     duration: 300,
     easing: Stepper.easings.linear,
+    loop: true,
     start: function () { ... },
     doing: function (n) { ... },
     ended: function () { ... },
