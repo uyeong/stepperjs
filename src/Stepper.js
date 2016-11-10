@@ -20,6 +20,7 @@ class Stepper {
      *     duration: 300,
      *     easing: linear,
      *     loop: true,
+     *     reverse: true,
      *     start: () => ... ,
      *     doing: (n) => ... ,
      *     ended: () => ... ,
@@ -31,6 +32,7 @@ class Stepper {
             duration = 0,
             easing = linear,
             loop = false,
+            reverse = false,
             start = () => {},
             doing = () => {},
             ended = () => {},
@@ -47,6 +49,8 @@ class Stepper {
             this.stop();
         }
 
+        const getNow = reverse ? (time => 0 + easing(time)) : (time => 1 - easing(time));
+
         let end = (+new Date()) + duration;
         const stepping = () => {
             const remaining = end - (+new Date());
@@ -62,7 +66,7 @@ class Stepper {
                 }
             }
 
-            doing(1 - easing(time));
+            doing(getNow(time));
             this.rafId = raf(stepping);
         };
 
