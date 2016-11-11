@@ -50,6 +50,15 @@
                     </select>
                 </label>
             </div>
+             <div class="controller__switch">
+                <label>
+                    <span>Reverse</span><br/>
+                    <select name="reverse">
+                        <option value="0" selected>NO</option>
+                        <option value="1">YES</option>
+                    </select>
+                </label>
+            </div>
             <div class="controller__switch">
                 <button class="button controller__start-btn">Start</button>
                 <button class="button controller__stop-btn">Stop</button>
@@ -70,11 +79,13 @@
     var elDurationInput = document.querySelector('input[name=duration]');
     var elEasingSelect = document.querySelector('select[name=easing]');
     var elLoopSelect = document.querySelector('select[name=loop]');
+    var elReverseSelect = document.querySelector('select[name=reverse]');
     var elConsoleArea = document.querySelector('textarea[name=console]');
     var elStartButton = document.querySelector('.controller__start-btn');
     var elStopButton = document.querySelector('.controller__stop-btn');
     var selectedEasing = 'linear';
     var selectedLoop = false;
+    var selectedReverse = false;
 
     function drawSelectOfEasingList() {
         var option,
@@ -105,11 +116,13 @@
         if (document.addEventListener) {
             elEasingSelect.addEventListener('change', onChangeEasingSelect);
             elLoopSelect.addEventListener('change', onChangeLoopSelect);
+            elReverseSelect.addEventListener('change', onChangeReverseSelect);
             elStartButton.addEventListener('click', onClickStartButton);
             elStopButton.addEventListener('click', onClickStopButton);
         } else {
             elEasingSelect.attachEvent('onchange', onChangeEasingSelect);
             elLoopSelect.attachEvent('onchange', onChangeLoopSelect);
+            elReverseSelect.attachEvent('onchange', onChangeReverseSelect);
             elStartButton.attachEvent('onclick', onClickStartButton);
             elStopButton.attachEvent('onclick', onClickStopButton);
         }
@@ -123,6 +136,10 @@
         selectedLoop = (event.currentTarget || event.srcElement).value === '1';
     }
 
+    function onChangeReverseSelect(event) {
+        selectedReverse = (event.currentTarget || event.srcElement).value === '1';
+    }
+
     function onClickStartButton() {
         var duration = parseInt(elDurationInput.value, 10);
         var endline = getEndlinePosition();
@@ -131,6 +148,7 @@
              duration: duration,
              easing: Stepper.easings[selectedEasing],
              loop: selectedLoop,
+             reverse: selectedReverse,
              start: function () {
                  printLogging('', true);
                  printLogging('Stepper Start');

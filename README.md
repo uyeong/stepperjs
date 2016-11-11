@@ -24,6 +24,7 @@ stepper.start({
     duration: 300, // default: 0
     easing: linear, // default: linear
     loop: true, // default: false
+    reverse: true, // default: false
     start: () => ... ,
     doing: (n) => ... ,
     ended: () => ... ,
@@ -46,6 +47,7 @@ stepper.start({
     duration: 300,
     easing: Stepper.easings.linear,
     loop: true,
+    reverse: true,
     start: function () { ... },
     doing: function (n) { ... },
     ended: function () { ... },
