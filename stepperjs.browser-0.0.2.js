@@ -65,7 +65,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var easings = void 0;
 	
 	if (true) {
-	    easings = __webpack_require__(6);
+	    easings = __webpack_require__(7);
 	}
 	
 	module.exports = _Stepper2['default'];
@@ -83,7 +83,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _raf2 = _interopRequireDefault(_raf);
 	
-	var _linear = __webpack_require__(5);
+	var _Status = __webpack_require__(5);
+	
+	var _Status2 = _interopRequireDefault(_Status);
+	
+	var _linear = __webpack_require__(6);
 	
 	var _linear2 = _interopRequireDefault(_linear);
 	
@@ -96,7 +100,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _classCallCheck(this, Stepper);
 	
 	        this.rafId = 0;
-	        this.stopped = null;
+	        this.pastTime = 0;
+	        this.status = new _Status2['default']();
+	        this.fnStopped = null;
 	    }
 	
 	    /**
@@ -112,8 +118,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     *     duration: 300,
 	     *     easing: linear,
 	     *     loop: true,
+	     *     reverse: true,
 	     *     start: () => ... ,
 	     *     doing: (n) => ... ,
+	     *     paused = () => ... ,
 	     *     ended: () => ... ,
 	     *     stopped: () => ...
 	     * });
@@ -130,59 +138,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	            easing = _options$easing === undefined ? _linear2['default'] : _options$easing,
 	            _options$loop = options.loop,
 	            loop = _options$loop === undefined ? false : _options$loop,
+	            _options$reverse = options.reverse,
+	            reverse = _options$reverse === undefined ? false : _options$reverse,
 	            _options$start = options.start,
 	            start = _options$start === undefined ? function () {} : _options$start,
 	            _options$doing = options.doing,
 	            doing = _options$doing === undefined ? function () {} : _options$doing,
+	            _options$paused = options.paused,
+	            paused = _options$paused === undefined ? function () {} : _options$paused,
 	            _options$ended = options.ended,
 	            ended = _options$ended === undefined ? function () {} : _options$ended,
 	            _options$stopped = options.stopped,
 	            stopped = _options$stopped === undefined ? function () {} : _options$stopped;
 	
 	
-	        if (!duration) {
+	        if (duration === 0 || this.status.isPlaying()) {
 	            return;
 	        }
 	
-	        this.stopped = stopped;
+	        this.fnStopped = stopped;
 	
-	        if (this.rafId) {
-	            this.stop();
-	        }
-	
-	        var end = +new Date() + duration;
+	        var getNow = reverse ? function (time) {
+	            return 1 - easing(time);
+	        } : function (time) {
+	            return 0 + easing(time);
+	        };
+	        var startTime = +new Date() - this.pastTime;
 	        var stepping = function stepping() {
-	            var remaining = end - +new Date();
-	            var time = remaining / duration;
+	            var pastTime = +new Date() - startTime;
+	            var progress = pastTime / duration;
 	
-	            if (remaining < 0) {
-	                ended();
+	            if (_this.status.isPaused()) {
+	                // Cache past time for replay.
+	                _this.pastTime = pastTime;
 	                _this.rafId = 0;
-	                end = +new Date() + duration;
 	
-	                if (!loop) {
+	                _raf2['default'].cancel(_this.rafId);
+	                paused();
+	
+	                return;
+	            }
+	
+	            if (pastTime >= duration) {
+	                if (loop) {
+	                    startTime = +new Date();
+	                } else {
+	                    _this.pastTime = 0;
+	                    _this.rafId = 0;
+	
+	                    _this.status.toStop();
+	
+	                    ended();
+	
 	                    return;
 	                }
 	            }
 	
-	            doing(1 - easing(time));
+	            doing(getNow(progress));
 	            _this.rafId = (0, _raf2['default'])(stepping);
 	        };
+	
+	        this.status.toPlay();
 	
 	        start();
 	        stepping();
 	    };
 	
+	    Stepper.prototype.pause = function pause() {
+	        this.status.toPause();
+	    };
+	
 	    Stepper.prototype.stop = function stop() {
-	        if (!this.rafId) {
-	            return;
-	        }
+	        if (this.status.toStop()) {
+	            _raf2['default'].cancel(this.rafId);
 	
-	        _raf2['default'].cancel(this.rafId);
-	        this.rafId = 0;
+	            this.pastTime = 0;
+	            this.rafId = 0;
 	
-	        if (this.stopped) {
-	            this.stopped();
+	            if (this.fnStopped) {
+	                this.fnStopped();
+	            }
 	        }
 	    };
 	
@@ -501,6 +536,77 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	
+	exports.__esModule = true;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Status = function () {
+	    function Status() {
+	        _classCallCheck(this, Status);
+	
+	        this.toStop();
+	    }
+	
+	    Status.prototype.toPlay = function toPlay() {
+	        if (this.isPlaying()) {
+	            return false;
+	        }
+	
+	        this.pending = false;
+	        this.paused = false;
+	
+	        return true;
+	    };
+	
+	    Status.prototype.toPause = function toPause() {
+	        if (this.isPending()) {
+	            return false;
+	        }
+	
+	        this.pending = true;
+	        this.paused = true;
+	
+	        return true;
+	    };
+	
+	    Status.prototype.toStop = function toStop() {
+	        if (this.isStopped()) {
+	            return false;
+	        }
+	
+	        this.pending = true;
+	        this.paused = false;
+	
+	        return true;
+	    };
+	
+	    Status.prototype.isPending = function isPending() {
+	        return this.pending;
+	    };
+	
+	    Status.prototype.isPlaying = function isPlaying() {
+	        return !this.pending;
+	    };
+	
+	    Status.prototype.isPaused = function isPaused() {
+	        return this.paused;
+	    };
+	
+	    Status.prototype.isStopped = function isStopped() {
+	        return this.isPending() && !this.isPaused();
+	    };
+	
+	    return Status;
+	}();
+	
+	exports["default"] = Status;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
 	function linear(n) {
 	    return n;
 	}
@@ -508,7 +614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = linear;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -517,41 +623,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	// https://github.com/component/ease
 	// https://github.com/tweenjs/tween.js
 	module.exports = {
-	    linear: __webpack_require__(5),
-	    inQuad: __webpack_require__(7),
-	    outQuad: __webpack_require__(8),
-	    inOutQuad: __webpack_require__(9),
-	    inCube: __webpack_require__(10),
-	    outCube: __webpack_require__(11),
-	    inOutCube: __webpack_require__(12),
-	    inQuart: __webpack_require__(13),
-	    outQuart: __webpack_require__(14),
-	    inOutQuart: __webpack_require__(15),
-	    inQunit: __webpack_require__(16),
-	    outQunit: __webpack_require__(17),
-	    inOutQunit: __webpack_require__(18),
-	    inSine: __webpack_require__(19),
-	    outSine: __webpack_require__(20),
-	    inOutSine: __webpack_require__(21),
-	    inExpo: __webpack_require__(22),
-	    outExpo: __webpack_require__(23),
-	    inOutExpo: __webpack_require__(24),
-	    inCirc: __webpack_require__(25),
-	    outCirc: __webpack_require__(26),
-	    inOutCirc: __webpack_require__(27),
-	    inBack: __webpack_require__(28),
-	    outBack: __webpack_require__(29),
-	    inOutBack: __webpack_require__(30),
-	    inBounce: __webpack_require__(31),
-	    outBounce: __webpack_require__(32),
-	    inOutBounce: __webpack_require__(33),
-	    inElastic: __webpack_require__(34),
-	    outElastic: __webpack_require__(35),
-	    inOutElastic: __webpack_require__(36)
+	    linear: __webpack_require__(6),
+	    inQuad: __webpack_require__(8),
+	    outQuad: __webpack_require__(9),
+	    inOutQuad: __webpack_require__(10),
+	    inCube: __webpack_require__(11),
+	    outCube: __webpack_require__(12),
+	    inOutCube: __webpack_require__(13),
+	    inQuart: __webpack_require__(14),
+	    outQuart: __webpack_require__(15),
+	    inOutQuart: __webpack_require__(16),
+	    inQunit: __webpack_require__(17),
+	    outQunit: __webpack_require__(18),
+	    inOutQunit: __webpack_require__(19),
+	    inSine: __webpack_require__(20),
+	    outSine: __webpack_require__(21),
+	    inOutSine: __webpack_require__(22),
+	    inExpo: __webpack_require__(23),
+	    outExpo: __webpack_require__(24),
+	    inOutExpo: __webpack_require__(25),
+	    inCirc: __webpack_require__(26),
+	    outCirc: __webpack_require__(27),
+	    inOutCirc: __webpack_require__(28),
+	    inBack: __webpack_require__(29),
+	    outBack: __webpack_require__(30),
+	    inOutBack: __webpack_require__(31),
+	    inBounce: __webpack_require__(32),
+	    outBounce: __webpack_require__(33),
+	    inOutBounce: __webpack_require__(34),
+	    inElastic: __webpack_require__(35),
+	    outElastic: __webpack_require__(36),
+	    inOutElastic: __webpack_require__(37)
 	};
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -563,7 +669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inQuad;
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -575,7 +681,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outQuad;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -593,7 +699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutQuad;
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -605,7 +711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inCube;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -617,7 +723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outCube;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -635,7 +741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutCube;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -647,7 +753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inQuart;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -659,7 +765,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outQuart;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -677,7 +783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutQuart;
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -689,7 +795,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inQunit;
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -701,7 +807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outQunit;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -719,7 +825,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutQuint;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -731,7 +837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inSine;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -743,7 +849,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outSine;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -755,7 +861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutSine;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -767,7 +873,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inExpo;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -779,7 +885,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outExpo;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -799,7 +905,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutExpo;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -811,7 +917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inCirc;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -823,7 +929,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outCirc;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -840,7 +946,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutCirc;
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -854,7 +960,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inBack;
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -868,7 +974,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outBack;
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -886,12 +992,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutBack;
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _outBounce = __webpack_require__(32);
+	var _outBounce = __webpack_require__(33);
 	
 	var _outBounce2 = _interopRequireDefault(_outBounce);
 	
@@ -904,7 +1010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inBounce;
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -924,16 +1030,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outBounce;
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _inBounce = __webpack_require__(31);
+	var _inBounce = __webpack_require__(32);
 	
 	var _inBounce2 = _interopRequireDefault(_inBounce);
 	
-	var _outBounce = __webpack_require__(32);
+	var _outBounce = __webpack_require__(33);
 	
 	var _outBounce2 = _interopRequireDefault(_outBounce);
 	
@@ -950,7 +1056,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inOutBounce;
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -979,7 +1085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = inElastic;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1008,7 +1114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = outElastic;
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1043,4 +1149,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=stepperjs.browser-0.0.1.js.map
+//# sourceMappingURL=stepperjs.browser-0.0.2.js.map
