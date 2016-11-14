@@ -1,6 +1,6 @@
 {
   "name": "stepperjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A tiny requestAnimationFrame wrapper to improve usability.",
   "main": "dist/index.js",
   "files": [
