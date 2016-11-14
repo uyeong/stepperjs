@@ -11,10 +11,11 @@
         .wrapper{padding:20px}
         .animation{width:100%;height:80px;border:1px solid #000;font-size:.75rem}
         .animation__inner{position:relative;width:100%;height:100%;overflow:hidden;transform:translate3d(0,0,0)}
-        .animation__target{position:absolute;width:80px;height:80px;background:#000;left:0;-webkit-will-change:left;-moz-will-change:left;will-change:left}
+        .animation__target{position:absolute;width:80px;height:80px;background:#000;left:0;top:0;-webkit-will-change:left;-moz-will-change:left;will-change:left}
         .animation__target span{display:inline-block;text-align:center;padding:26px 0;color:#FFF}
         .controller__switch{display:inline-block;margin:10px 10px 0 0}
-        .console__inner textarea{width:100%;padding:10px;box-sizing:border-box}
+        .console__inner {position:relative;width:100%;height:150px;overflow:hidden;transform:translate3d(0,0,0)}
+        .console__inner textarea{position:absolute;width:100%;height:150px;padding:10px;box-sizing:border-box;left:0;-webkit-will-change:scroll-position;-moz-will-change:scroll-position;will-change:scroll-position}
     </style>
 </head>
 <body>
@@ -60,7 +61,7 @@
                 </label>
             </div>
             <div class="controller__switch">
-                <button class="button controller__start-btn">Start</button>
+                <button class="button controller__play-btn">Start</button>
                 <button class="button controller__stop-btn">Stop</button>
             </div>
         </div>
@@ -81,7 +82,7 @@
     var elLoopSelect = document.querySelector('select[name=loop]');
     var elReverseSelect = document.querySelector('select[name=reverse]');
     var elConsoleArea = document.querySelector('textarea[name=console]');
-    var elStartButton = document.querySelector('.controller__start-btn');
+    var elPlayButton = document.querySelector('.controller__play-btn');
     var elStopButton = document.querySelector('.controller__stop-btn');
     var selectedEasing = 'linear';
     var selectedLoop = false;
@@ -117,13 +118,13 @@
             elEasingSelect.addEventListener('change', onChangeEasingSelect);
             elLoopSelect.addEventListener('change', onChangeLoopSelect);
             elReverseSelect.addEventListener('change', onChangeReverseSelect);
-            elStartButton.addEventListener('click', onClickStartButton);
+            elPlayButton.addEventListener('click', onClickPlayButton);
             elStopButton.addEventListener('click', onClickStopButton);
         } else {
             elEasingSelect.attachEvent('onchange', onChangeEasingSelect);
             elLoopSelect.attachEvent('onchange', onChangeLoopSelect);
             elReverseSelect.attachEvent('onchange', onChangeReverseSelect);
-            elStartButton.attachEvent('onclick', onClickStartButton);
+            elPlayButton.attachEvent('onclick', onClickPlayButton);
             elStopButton.attachEvent('onclick', onClickStopButton);
         }
     }
@@ -140,44 +141,63 @@
         selectedReverse = (event.currentTarget || event.srcElement).value === '1';
     }
 
-    function onClickStartButton() {
-        var duration = parseInt(elDurationInput.value, 10);
-        var endline = getEndlinePosition();
+    function onClickPlayButton() {
+        var isStart = elPlayButton.innerHTML === 'Start';
+        var duration;
+        var endline;
 
-         stepper.start({
-             duration: duration,
-             easing: Stepper.easings[selectedEasing],
-             loop: selectedLoop,
-             reverse: selectedReverse,
-             start: function () {
-                 printLogging('', true);
-                 printLogging('Stepper Start');
-                 printLogging('  - Duration : ' + duration);
-                 printLogging('  - Easing : ' + selectedEasing);
-                 printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
-                 printLogging('----------------------');
-             },
-             doing: function (now) {
-                 var position = endline * now + 'px';
+        if (isStart) {
+            duration = parseInt(elDurationInput.value, 10);
+            endline = getEndlinePosition();
 
-                 elAnimationTarget.style.left = position;
+            stepper.start({
+                duration: duration,
+                easing: Stepper.easings[selectedEasing],
+                loop: selectedLoop,
+                reverse: selectedReverse,
+                start: function () {
+                    elPlayButton.innerHTML = 'Pause';
 
-                 printLogging('now : ' + now);
-                 printLogging('left : ' + position);
-             },
-             ended: function () {
-                 elAnimationTarget.style.left = endline + 'px';
+                    printLogging('', true);
+                    printLogging('Stepper Start');
+                    printLogging('  - Duration : ' + duration);
+                    printLogging('  - Easing : ' + selectedEasing);
+                    printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
+                    printLogging('----------------------');
+                },
+                doing: function (now) {
+                    var position = endline * now + 'px';
 
-                 printLogging('----------------------');
-                 printLogging('ended!!');
-             },
-             stopped: function () {
-                 elAnimationTarget.style.left = '0px';
+                    elAnimationTarget.style.left = position;
 
-                 printLogging('----------------------');
-                 printLogging('stopped!!');
-             }
-         });
+                    printLogging('now : ' + now);
+                    printLogging('left : ' + position);
+                },
+                paused: function () {
+                    elPlayButton.innerHTML = 'Start';
+
+                    printLogging('----------------------');
+                    printLogging('paused!!');
+                },
+                ended: function () {
+                    elAnimationTarget.style.left = endline + 'px';
+                    elPlayButton.innerHTML = 'Start';
+
+                    printLogging('----------------------');
+                    printLogging('ended!!');
+                },
+                stopped: function () {
+                    elAnimationTarget.style.left = '0px';
+                    elPlayButton.innerHTML = 'Start';
+
+                    printLogging('----------------------');
+                    printLogging('stopped!!');
+                }
+            });
+        } else {
+            stepper.pause();
+        }
+
     }
 
     function onClickStopButton() {

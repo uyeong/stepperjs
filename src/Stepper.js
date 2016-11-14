@@ -1,10 +1,13 @@
 import raf from 'raf';
+import Status from './Status';
 import linear from './easings/linear';
 
 class Stepper {
     constructor() {
         this.rafId = 0;
-        this.stopped = null;
+        this.pastTime = 0;
+        this.status = new Status();
+        this.fnStopped = null;
     }
 
     /**
@@ -23,6 +26,7 @@ class Stepper {
      *     reverse: true,
      *     start: () => ... ,
      *     doing: (n) => ... ,
+     *     paused = () => ... ,
      *     ended: () => ... ,
      *     stopped: () => ...
      * });
@@ -35,55 +39,73 @@ class Stepper {
             reverse = false,
             start = () => {},
             doing = () => {},
+            paused = () => {},
             ended = () => {},
             stopped = () => {}
         } = options;
 
-        if (!duration) {
+        if (duration === 0 || this.status.isPlaying()) {
             return;
         }
 
-        this.stopped = stopped;
+        this.fnStopped = stopped;
 
-        if (this.rafId) {
-            this.stop();
-        }
-
-        const getNow = reverse ? (time => 0 + easing(time)) : (time => 1 - easing(time));
-
-        let end = (+new Date()) + duration;
+        const getNow = reverse ? (time => 1 - easing(time)) : (time => 0 + easing(time));
+        let startTime = (+new Date()) - this.pastTime;
         const stepping = () => {
-            const remaining = end - (+new Date());
-            const time = remaining / duration;
+            const pastTime = (+new Date()) - startTime;
+            const progress = pastTime / duration;
 
-            if (remaining < 0) {
-                ended();
+            if (this.status.isPaused()) {
+                // Cache past time for replay.
+                this.pastTime = pastTime;
                 this.rafId = 0;
-                end = (+new Date()) + duration;
 
-                if (!loop) {
+                raf.cancel(this.rafId);
+                paused();
+
+                return;
+            }
+
+            if (pastTime >= duration) {
+                if (loop) {
+                    startTime = (+new Date());
+                } else {
+                    this.pastTime = 0;
+                    this.rafId = 0;
+
+                    this.status.toStop();
+
+                    ended();
+
                     return;
                 }
             }
 
-            doing(getNow(time));
+            doing(getNow(progress));
             this.rafId = raf(stepping);
         };
+
+        this.status.toPlay();
 
         start();
         stepping();
     }
 
+    pause() {
+        this.status.toPause();
+    }
+
     stop() {
-        if (!this.rafId) {
-            return;
-        }
+        if (this.status.toStop()) {
+            raf.cancel(this.rafId);
 
-        raf.cancel(this.rafId);
-        this.rafId = 0;
+            this.pastTime = 0;
+            this.rafId = 0;
 
-        if (this.stopped) {
-            this.stopped();
+            if (this.fnStopped) {
+                this.fnStopped();
+            }
         }
     }
 }

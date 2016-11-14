@@ -27,10 +27,12 @@ stepper.start({
     reverse: true, // default: false
     start: () => ... ,
     doing: (n) => ... ,
+    paused: () => ... ,
     ended: () => ... ,
     stopped: () => ...
 });
 
+stepper.pause();
 stepper.stop();
 ```
 
@@ -50,10 +52,12 @@ stepper.start({
     reverse: true,
     start: function () { ... },
     doing: function (n) { ... },
+    paused: function () { ... },
     ended: function () { ... },
     stopped: function () { ... }
 });
 
+stepper.pause();
 stepper.stop();
 ```
 
