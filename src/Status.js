@@ -1,47 +1,40 @@
 class Status {
     constructor() {
-        this.toStop();
+        this.stopped = true;
+        this.paused = false;
     }
 
-    toPlay() {
+    play() {
         if (this.isPlaying()) {
             return false;
         }
 
-        this.pending = false;
+        this.stopped = false;
         this.paused = false;
 
         return true;
     }
 
-    toPause() {
-        if (this.isPending()) {
-            return false;
-        }
-
-        this.pending = true;
-        this.paused = true;
-
-        return true;
-    }
-
-    toStop() {
+    pause() {
         if (this.isStopped()) {
             return false;
         }
 
-        this.pending = true;
-        this.paused = false;
-
+        this.paused = true;
         return true;
     }
 
-    isPending() {
-        return this.pending;
+    stop() {
+        if (this.isStopped()) {
+            return false;
+        }
+
+        this.stopped = true;
+        return true;
     }
 
     isPlaying() {
-        return !this.pending;
+        return (!this.stopped && !this.paused);
     }
 
     isPaused() {
@@ -49,7 +42,7 @@ class Status {
     }
 
     isStopped() {
-        return this.isPending() && !this.isPaused();
+        return this.stopped;
     }
 }
 

@@ -55,7 +55,6 @@ class Stepper {
         const stepping = () => {
             const pastTime = (+new Date()) - startTime;
             const progress = pastTime / duration;
-
             if (this.status.isPaused()) {
                 // Cache past time for replay.
                 this.pastTime = pastTime;
@@ -74,7 +73,7 @@ class Stepper {
                     this.pastTime = 0;
                     this.rafId = 0;
 
-                    this.status.toStop();
+                    this.status.stop();
 
                     ended();
 
@@ -86,18 +85,18 @@ class Stepper {
             this.rafId = raf(stepping);
         };
 
-        this.status.toPlay();
+        this.status.play();
 
         start();
         stepping();
     }
 
     pause() {
-        this.status.toPause();
+        this.status.pause();
     }
 
     stop() {
-        if (this.status.toStop()) {
+        if (this.status.stop()) {
             raf.cancel(this.rafId);
 
             this.pastTime = 0;
