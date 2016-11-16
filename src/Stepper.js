@@ -7,6 +7,7 @@ class Stepper {
         this.rafId = 0;
         this.pastTime = 0;
         this.status = new Status();
+        this.fnPaused = null;
         this.fnStopped = null;
     }
 
@@ -48,6 +49,7 @@ class Stepper {
             return;
         }
 
+        this.fnPaused = paused;
         this.fnStopped = stopped;
 
         const getNow = reverse ? (time => 1 - easing(time)) : (time => 0 + easing(time));
@@ -55,16 +57,6 @@ class Stepper {
         const stepping = () => {
             const pastTime = (+new Date()) - startTime;
             const progress = pastTime / duration;
-            if (this.status.isPaused()) {
-                // Cache past time for replay.
-                this.pastTime = pastTime;
-                this.rafId = 0;
-
-                raf.cancel(this.rafId);
-                paused();
-
-                return;
-            }
 
             if (pastTime >= duration) {
                 if (loop) {
@@ -72,7 +64,6 @@ class Stepper {
                 } else {
                     this.pastTime = 0;
                     this.rafId = 0;
-
                     this.status.stop();
 
                     ended();
@@ -82,6 +73,8 @@ class Stepper {
             }
 
             doing(getNow(progress));
+
+            this.pastTime = pastTime;
             this.rafId = raf(stepping);
         };
 
@@ -92,19 +85,33 @@ class Stepper {
     }
 
     pause() {
+        if (this.status.isPaused()) {
+            return;
+        }
+
+        raf.cancel(this.rafId);
+
+        this.rafId = 0;
         this.status.pause();
+
+        if (this.fnPaused) {
+            this.fnPaused();
+        }
     }
 
     stop() {
-        if (this.status.stop()) {
-            raf.cancel(this.rafId);
+        if (this.status.isStopped()) {
+            return;
+        }
 
-            this.pastTime = 0;
-            this.rafId = 0;
+        raf.cancel(this.rafId);
 
-            if (this.fnStopped) {
-                this.fnStopped();
-            }
+        this.pastTime = 0;
+        this.rafId = 0;
+        this.status.stop();
+
+        if (this.fnStopped) {
+            this.fnStopped();
         }
     }
 }

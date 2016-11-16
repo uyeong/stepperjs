@@ -5,32 +5,16 @@ class Status {
     }
 
     play() {
-        if (this.isPlaying()) {
-            return false;
-        }
-
         this.stopped = false;
         this.paused = false;
-
-        return true;
     }
 
     pause() {
-        if (this.isStopped()) {
-            return false;
-        }
-
         this.paused = true;
-        return true;
     }
 
     stop() {
-        if (this.isStopped()) {
-            return false;
-        }
-
         this.stopped = true;
-        return true;
     }
 
     isPlaying() {
