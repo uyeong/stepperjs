@@ -102,6 +102,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.rafId = 0;
 	        this.pastTime = 0;
 	        this.status = new _Status2['default']();
+	        this.fnPaused = null;
 	        this.fnStopped = null;
 	    }
 	
@@ -156,6 +157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 	
+	        this.fnPaused = paused;
 	        this.fnStopped = stopped;
 	
 	        var getNow = reverse ? function (time) {
@@ -168,25 +170,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var pastTime = +new Date() - startTime;
 	            var progress = pastTime / duration;
 	
-	            if (_this.status.isPaused()) {
-	                // Cache past time for replay.
-	                _this.pastTime = pastTime;
-	                _this.rafId = 0;
-	
-	                _raf2['default'].cancel(_this.rafId);
-	                paused();
-	
-	                return;
-	            }
-	
 	            if (pastTime >= duration) {
 	                if (loop) {
 	                    startTime = +new Date();
 	                } else {
 	                    _this.pastTime = 0;
 	                    _this.rafId = 0;
-	
-	                    _this.status.toStop();
+	                    _this.status.stop();
 	
 	                    ended();
 	
@@ -195,29 +185,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	
 	            doing(getNow(progress));
+	
+	            _this.pastTime = pastTime;
 	            _this.rafId = (0, _raf2['default'])(stepping);
 	        };
 	
-	        this.status.toPlay();
+	        this.status.play();
 	
 	        start();
 	        stepping();
 	    };
 	
 	    Stepper.prototype.pause = function pause() {
-	        this.status.toPause();
+	        if (this.status.isPaused()) {
+	            return;
+	        }
+	
+	        _raf2['default'].cancel(this.rafId);
+	
+	        this.rafId = 0;
+	        this.status.pause();
+	
+	        if (this.fnPaused) {
+	            this.fnPaused();
+	        }
 	    };
 	
 	    Stepper.prototype.stop = function stop() {
-	        if (this.status.toStop()) {
-	            _raf2['default'].cancel(this.rafId);
+	        if (this.status.isStopped()) {
+	            return;
+	        }
 	
-	            this.pastTime = 0;
-	            this.rafId = 0;
+	        _raf2['default'].cancel(this.rafId);
 	
-	            if (this.fnStopped) {
-	                this.fnStopped();
-	            }
+	        this.pastTime = 0;
+	        this.rafId = 0;
+	        this.status.stop();
+	
+	        if (this.fnStopped) {
+	            this.fnStopped();
 	        }
 	    };
 	
@@ -544,48 +550,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function Status() {
 	        _classCallCheck(this, Status);
 	
-	        this.toStop();
+	        this.stopped = true;
+	        this.paused = false;
 	    }
 	
-	    Status.prototype.toPlay = function toPlay() {
-	        if (this.isPlaying()) {
-	            return false;
-	        }
-	
-	        this.pending = false;
+	    Status.prototype.play = function play() {
+	        this.stopped = false;
 	        this.paused = false;
-	
-	        return true;
 	    };
 	
-	    Status.prototype.toPause = function toPause() {
-	        if (this.isPending()) {
-	            return false;
-	        }
-	
-	        this.pending = true;
+	    Status.prototype.pause = function pause() {
 	        this.paused = true;
-	
-	        return true;
 	    };
 	
-	    Status.prototype.toStop = function toStop() {
-	        if (this.isStopped()) {
-	            return false;
-	        }
-	
-	        this.pending = true;
-	        this.paused = false;
-	
-	        return true;
-	    };
-	
-	    Status.prototype.isPending = function isPending() {
-	        return this.pending;
+	    Status.prototype.stop = function stop() {
+	        this.stopped = true;
 	    };
 	
 	    Status.prototype.isPlaying = function isPlaying() {
-	        return !this.pending;
+	        return !this.stopped && !this.paused;
 	    };
 	
 	    Status.prototype.isPaused = function isPaused() {
@@ -593,7 +576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	
 	    Status.prototype.isStopped = function isStopped() {
-	        return this.isPending() && !this.isPaused();
+	        return this.stopped;
 	    };
 	
 	    return Status;
@@ -1149,4 +1132,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=stepperjs.browser-0.0.2.js.map
+//# sourceMappingURL=stepperjs.browser-0.0.3.js.map
