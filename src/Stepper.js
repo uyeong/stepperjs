@@ -53,14 +53,19 @@ class Stepper {
         this.fnStopped = stopped;
 
         const getNow = reverse ? (time => 1 - easing(time)) : (time => 0 + easing(time));
-        let startTime = (+new Date()) - this.pastTime;
-        const stepping = () => {
-            const pastTime = (+new Date()) - startTime;
+        let startTime = 0;
+
+        const stepping = (timestamp) => {
+            if (!startTime) {
+                startTime = timestamp - this.pastTime;
+            }
+
+            const pastTime = timestamp - startTime;
             const progress = pastTime / duration;
 
             if (pastTime >= duration) {
                 if (loop) {
-                    startTime = (+new Date());
+                    startTime = timestamp;
                 } else {
                     this.pastTime = 0;
                     this.rafId = 0;
@@ -81,7 +86,7 @@ class Stepper {
         this.status.play();
 
         start();
-        stepping();
+        raf(stepping);
     }
 
     pause() {
