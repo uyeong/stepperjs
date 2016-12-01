@@ -1,4 +1,3 @@
-import raf from 'raf';
 import Status from './Status';
 import linear from './easings/linear';
 
@@ -80,13 +79,14 @@ class Stepper {
             doing(getNow(progress));
 
             this.pastTime = pastTime;
-            this.rafId = raf(stepping);
+            this.rafId = window.requestAnimationFrame(stepping);
         };
 
         this.status.play();
 
         start();
-        raf(stepping);
+
+        window.requestAnimationFrame(stepping);
     }
 
     pause() {
@@ -94,7 +94,7 @@ class Stepper {
             return;
         }
 
-        raf.cancel(this.rafId);
+        window.cancelAnimationFrame(this.rafId);
 
         this.rafId = 0;
         this.status.pause();
@@ -109,7 +109,7 @@ class Stepper {
             return;
         }
 
-        raf.cancel(this.rafId);
+        window.cancelAnimationFrame(this.rafId);
 
         this.pastTime = 0;
         this.rafId = 0;

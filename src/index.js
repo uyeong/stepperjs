@@ -1,4 +1,8 @@
+import raf from 'raf';
 import Stepper from './Stepper';
+
+raf.polyfill();
+
 let easings;
 
 if (process.env.BROWSER) {
