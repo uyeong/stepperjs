@@ -74,7 +74,6 @@
 </div>
 
 <script>
-    var stepper = new Stepper();
     var elAnimationWrap = document.querySelector('.animation');
     var elAnimationTarget = document.querySelector('.animation__target');
     var elDurationInput = document.querySelector('input[name=duration]');
@@ -87,12 +86,53 @@
     var selectedEasing = 'linear';
     var selectedLoop = false;
     var selectedReverse = false;
+    var endline = 0;
+    var stepper = new stepperjs.Stepper().on({
+        start: function () {
+            elPlayButton.innerHTML = 'Pause';
+
+            printLogging('', true);
+            printLogging('Stepper Start');
+            printLogging('  - Duration : ' + stepper.duration);
+            printLogging('  - Easing : ' + selectedEasing);
+            printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
+            printLogging('----------------------');
+        },
+        update: function (now) {
+            var position = endline * now + 'px';
+
+            elAnimationTarget.style.left = position;
+
+            printLogging('now : ' + now);
+            printLogging('left : ' + position);
+        },
+        paused: function () {
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('paused!!');
+        },
+        ended: function () {
+            elAnimationTarget.style.left = endline + 'px';
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('ended!!');
+        },
+        stopped: function () {
+            elAnimationTarget.style.left = '0px';
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('stopped!!');
+        }
+    });
 
     function drawSelectOfEasingList() {
         var option,
             key;
 
-        for(key in Stepper.easings) {
+        for(key in stepperjs.easings) {
             option = document.createElement('option');
             option.text = key;
             option.value = key;
@@ -143,57 +183,18 @@
 
     function onClickPlayButton() {
         var isStart = elPlayButton.innerHTML === 'Start';
-        var duration;
-        var endline;
 
         if (isStart) {
-            duration = parseInt(elDurationInput.value, 10);
+            stepper.option({
+                duration: parseInt(elDurationInput.value, 10),
+                easing: stepperjs.easings[selectedEasing],
+                loop: selectedLoop,
+                reverse: selectedReverse
+            });
+
             endline = getEndlinePosition();
 
-            stepper.start({
-                duration: duration,
-                easing: Stepper.easings[selectedEasing],
-                loop: selectedLoop,
-                reverse: selectedReverse,
-                start: function () {
-                    elPlayButton.innerHTML = 'Pause';
-
-                    printLogging('', true);
-                    printLogging('Stepper Start');
-                    printLogging('  - Duration : ' + duration);
-                    printLogging('  - Easing : ' + selectedEasing);
-                    printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
-                    printLogging('----------------------');
-                },
-                doing: function (now) {
-                    var position = endline * now + 'px';
-
-                    elAnimationTarget.style.left = position;
-
-                    printLogging('now : ' + now);
-                    printLogging('left : ' + position);
-                },
-                paused: function () {
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('paused!!');
-                },
-                ended: function () {
-                    elAnimationTarget.style.left = endline + 'px';
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('ended!!');
-                },
-                stopped: function () {
-                    elAnimationTarget.style.left = '0px';
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('stopped!!');
-                }
-            });
+            stepper.start();
         } else {
             stepper.pause();
         }

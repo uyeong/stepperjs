@@ -20,20 +20,20 @@ import linear from 'stepperjs/dist/easings/linear';
 
 const stepper = new Stepper();
 
-stepper.start({
+stepper({
     duration: 300, // default: 0
     easing: linear, // default: linear
     loop: true, // default: false
-    reverse: true, // default: false
+    reverse: true // default: false
+}).on({
     start: () => ... ,
-    doing: (n) => ... ,
+    update: (n) => ... ,
     paused: () => ... ,
     ended: () => ... ,
     stopped: () => ...
 });
 
-stepper.pause();
-stepper.stop();
+stepper.start();
 ```
 
 for Browser
@@ -43,22 +43,22 @@ for Browser
 ```
 
 ```js
-var stepper = new Stepper();
-
-stepper.start({
+var Stepper = stepperjs.Stepper();
+var easings = stepperjs.easings();
+var stepper = new Stepper({
     duration: 300,
-    easing: Stepper.easings.linear,
+    easing: easings.linear,
     loop: true,
-    reverse: true,
+    reverse: true
+}).on({
     start: function () { ... },
-    doing: function (n) { ... },
+    update: function (n) { ... },
     paused: function () { ... },
     ended: function () { ... },
     stopped: function () { ... }
 });
 
-stepper.pause();
-stepper.stop();
+stepper.start();
 ```
 
 ## Supported browsers
