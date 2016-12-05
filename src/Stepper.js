@@ -1,57 +1,70 @@
+import EventEmitter3 from 'eventemitter3';
 import Status from './Status';
 import linear from './easings/linear';
 
 class Stepper {
-    constructor() {
-        this.rafId = 0;
-        this.pastTime = 0;
+    constructor(options = {}) {
+        this.duration = options.duration || 0;
+        this.easing = options.easing || linear;
+        this.loop = options.loop || false;
+        this.reverse = options.reverse || false;
+        this.emitter = new EventEmitter3();
         this.status = new Status();
-        this.fnPaused = null;
-        this.fnStopped = null;
+        this.pastTime = 0;
+        this.rafId = 0;
     }
 
-    /**
-     * Start a step of raf with easing.
-     * @param {Object} options
-     * @example
-     * import Stepper from 'stepperjs';
-     * import linear from 'stepperjs/dist/easings/linear';
-     *
-     * const stepper = new Stepper();
-     *
-     * stepper.start({
-     *     duration: 300,
-     *     easing: linear,
-     *     loop: true,
-     *     reverse: true,
-     *     start: () => ... ,
-     *     doing: (n) => ... ,
-     *     paused = () => ... ,
-     *     ended: () => ... ,
-     *     stopped: () => ...
-     * });
-     */
-    start(options = {}) {
-        const {
-            duration = 0,
-            easing = linear,
-            loop = false,
-            reverse = false,
-            start = () => {},
-            doing = () => {},
-            paused = () => {},
-            ended = () => {},
-            stopped = () => {}
-        } = options;
+    option(key, value) {
+        if (typeof key === 'string' && value === undefined) {
+            return this[key];
+        }
 
-        if (duration === 0 || this.status.isPlaying()) {
+        if (typeof key === 'object' && key.constructor === Object) {
+            for (let name in key) {
+                if (key.hasOwnProperty(name)) {
+                    this[name] = key[name];
+                }
+            }
+        } else {
+            this[key] = value;
+        }
+
+        return this;
+    }
+
+    on(...args) {
+        const arg = args[0];
+
+        if (typeof arg === 'object' && arg.constructor === Object) {
+            for (let key in arg) {
+                if (arg.hasOwnProperty(key)) {
+                    this.emitter.on(key, arg[key]);
+                }
+            }
+        } else {
+            this.emitter.on.apply(this.emitter, args);
+        }
+
+        return this;
+    }
+
+    off(...args) {
+        if (args.length === 0) {
+            this.emitter.removeAllListeners();
+        } else {
+            this.emitter.off.apply(this.emitter, args);
+        }
+
+        return this;
+    }
+
+    start() {
+        if (this.duration === 0 || this.status.isPlaying()) {
             return;
         }
 
-        this.fnPaused = paused;
-        this.fnStopped = stopped;
-
-        const getNow = reverse ? (time => 1 - easing(time)) : (time => 0 + easing(time));
+        const duration = this.duration;
+        const easing = this.reverse? (n) => 1 - this.easing(n) : (n) => 0 + this.easing(n);
         let startTime = 0;
 
         const stepping = (timestamp) => {
@@ -60,31 +73,29 @@ class Stepper {
             }
 
             const pastTime = timestamp - startTime;
-            const progress = pastTime / duration;
+            let progress = pastTime / duration;
 
             if (pastTime >= duration) {
-                if (loop) {
+                if (this.loop) {
                     startTime = timestamp;
                 } else {
                     this.pastTime = 0;
                     this.rafId = 0;
                     this.status.stop();
-
-                    ended();
+                    this.emitter.emit('ended');
 
                     return;
                 }
             }
 
-            doing(getNow(progress));
+            this.emitter.emit('update', easing(progress));
 
             this.pastTime = pastTime;
             this.rafId = window.requestAnimationFrame(stepping);
         };
 
         this.status.play();
-
-        start();
+        this.emitter.emit('start');
 
         window.requestAnimationFrame(stepping);
     }
@@ -98,10 +109,7 @@ class Stepper {
 
         this.rafId = 0;
         this.status.pause();
-
-        if (this.fnPaused) {
-            this.fnPaused();
-        }
+        this.emitter.emit('paused');
     }
 
     stop() {
@@ -114,10 +122,7 @@ class Stepper {
         this.pastTime = 0;
         this.rafId = 0;
         this.status.stop();
-
-        if (this.fnStopped) {
-            this.fnStopped();
-        }
+        this.emitter.emit('stopped');
     }
 }
 
