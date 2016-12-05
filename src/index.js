@@ -3,11 +3,4 @@ import Stepper from './Stepper';
 
 raf.polyfill();
 
-let easings;
-
-if (process.env.BROWSER) {
-    easings = require('./easings');
-}
-
-module.exports = Stepper;
-module.exports.easings = easings;
+export default Stepper;
