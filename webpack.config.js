@@ -24,12 +24,12 @@ if (PROD) {
 module.exports = {
     devtool: 'source-map',
     entry: {
-        app: './src/index.js'
+        app: './src/browser.js'
     },
     output: {
         path: path.resolve(__filename, '../dist'),
         filename: `${name}.browser-${version}${PROD ? '.min' : ''}.js`,
-        library: (name.replace(name[0], c => c.toUpperCase())).replace('js', ''),
+        library: name,
         libraryTarget: 'umd'
     },
     plugins: plugins.concat([
