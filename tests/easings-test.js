@@ -1,4 +1,4 @@
-import easings from '../../src/easings';
+import easings from '../src/easings';
 
 describe('Test of the Easing functions.', function() {
     describe('The user should be able to know the current progress by linear', () => {
