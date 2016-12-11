@@ -15,9 +15,9 @@
         .animation__target span{display:inline-block;text-align:center;padding:26px 0;color:#FFF}
         .controller__switch{display:inline-block;margin:10px 10px 0 0}
         .console__inner {position:relative;width:100%;height:150px;overflow:hidden;transform:translate3d(0,0,0)}
-        .console__inner textarea{position:absolute;width:100%;height:150px;padding:10px;box-sizing:border-box;left:0;-webkit-will-change:scroll-position;-moz-will-change:scroll-position;will-change:scroll-position}
+        .console__inner textarea{position:absolute;width:100%;height:150px;padding:10px;margin:0;box-sizing:border-box;left:0;-webkit-will-change:scroll-position;-moz-will-change:scroll-position;will-change:scroll-position}
     </style>
-<script type="text/javascript" src="stepperjs.browser-0.0.3.min.js"></script></head>
+<script type="text/javascript" src="stepperjs.browser-0.1.0.min.js"></script></head>
 <body>
 <div class="wrapper">
     <h1>StepperJS</h1>
@@ -74,7 +74,6 @@
 </div>
 
 <script>
-    var stepper = new Stepper();
     var elAnimationWrap = document.querySelector('.animation');
     var elAnimationTarget = document.querySelector('.animation__target');
     var elDurationInput = document.querySelector('input[name=duration]');
@@ -87,12 +86,52 @@
     var selectedEasing = 'linear';
     var selectedLoop = false;
     var selectedReverse = false;
+    var endline = 0;
+    var stepper = new stepperjs.Stepper().on({
+        start: function () {
+            elPlayButton.innerHTML = 'Pause';
+
+            printLogging('', true);
+            printLogging('Stepper Start');
+            printLogging('  - Duration : ' + stepper.duration);
+            printLogging('  - Easing : ' + selectedEasing);
+            printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
+            printLogging('----------------------');
+        },
+        update: function (now) {
+            var position = endline * now + 'px';
+
+            elAnimationTarget.style.left = position;
+
+            printLogging('now : ' + now);
+            printLogging('left : ' + position);
+        },
+        paused: function () {
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('paused!!');
+        },
+        ended: function () {
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('ended!!');
+        },
+        stopped: function () {
+            elAnimationTarget.style.left = '0px';
+            elPlayButton.innerHTML = 'Start';
+
+            printLogging('----------------------');
+            printLogging('stopped!!');
+        }
+    });
 
     function drawSelectOfEasingList() {
         var option,
             key;
 
-        for(key in Stepper.easings) {
+        for(key in stepperjs.easings) {
             option = document.createElement('option');
             option.text = key;
             option.value = key;
@@ -143,57 +182,18 @@
 
     function onClickPlayButton() {
         var isStart = elPlayButton.innerHTML === 'Start';
-        var duration;
-        var endline;
 
         if (isStart) {
-            duration = parseInt(elDurationInput.value, 10);
+            stepper.option({
+                duration: parseInt(elDurationInput.value, 10),
+                easing: stepperjs.easings[selectedEasing],
+                loop: selectedLoop,
+                reverse: selectedReverse
+            });
+
             endline = getEndlinePosition();
 
-            stepper.start({
-                duration: duration,
-                easing: Stepper.easings[selectedEasing],
-                loop: selectedLoop,
-                reverse: selectedReverse,
-                start: function () {
-                    elPlayButton.innerHTML = 'Pause';
-
-                    printLogging('', true);
-                    printLogging('Stepper Start');
-                    printLogging('  - Duration : ' + duration);
-                    printLogging('  - Easing : ' + selectedEasing);
-                    printLogging('  - Loop : ' + (selectedLoop ? 'YES' : 'NO'));
-                    printLogging('----------------------');
-                },
-                doing: function (now) {
-                    var position = endline * now + 'px';
-
-                    elAnimationTarget.style.left = position;
-
-                    printLogging('now : ' + now);
-                    printLogging('left : ' + position);
-                },
-                paused: function () {
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('paused!!');
-                },
-                ended: function () {
-                    elAnimationTarget.style.left = endline + 'px';
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('ended!!');
-                },
-                stopped: function () {
-                    elAnimationTarget.style.left = '0px';
-                    elPlayButton.innerHTML = 'Start';
-
-                    printLogging('----------------------');
-                    printLogging('stopped!!');
-                }
-            });
+            stepper.start();
         } else {
             stepper.pause();
         }

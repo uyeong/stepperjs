@@ -4,11 +4,13 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _raf = require('raf');
+var _eventemitter = require('eventemitter3');
 
-var _raf2 = _interopRequireDefault(_raf);
+var _eventemitter2 = _interopRequireDefault(_eventemitter);
 
 var _Status = require('./Status');
 
@@ -24,105 +26,124 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Stepper = function () {
     function Stepper() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
         _classCallCheck(this, Stepper);
 
-        this.rafId = 0;
-        this.pastTime = 0;
+        this.duration = options.duration || 0;
+        this.easing = options.easing || _linear2.default;
+        this.loop = options.loop || false;
+        this.reverse = options.reverse || false;
+        this.emitter = new _eventemitter2.default();
         this.status = new _Status2.default();
-        this.fnPaused = null;
-        this.fnStopped = null;
+        this.pastTime = 0;
+        this.rafId = 0;
     }
 
-    /**
-     * Start a step of raf with easing.
-     * @param {Object} options
-     * @example
-     * import Stepper from 'stepperjs';
-     * import linear from 'stepperjs/dist/easings/linear';
-     *
-     * const stepper = new Stepper();
-     *
-     * stepper.start({
-     *     duration: 300,
-     *     easing: linear,
-     *     loop: true,
-     *     reverse: true,
-     *     start: () => ... ,
-     *     doing: (n) => ... ,
-     *     paused = () => ... ,
-     *     ended: () => ... ,
-     *     stopped: () => ...
-     * });
-     */
-
-
     _createClass(Stepper, [{
+        key: 'option',
+        value: function option(key, value) {
+            if (typeof key === 'string' && value === undefined) {
+                return this[key];
+            }
+
+            if ((typeof key === 'undefined' ? 'undefined' : _typeof(key)) === 'object' && key.constructor === Object) {
+                for (var name in key) {
+                    if (key.hasOwnProperty(name)) {
+                        this[name] = key[name];
+                    }
+                }
+            } else {
+                this[key] = value;
+            }
+
+            return this;
+        }
+    }, {
+        key: 'on',
+        value: function on() {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            var arg = args[0];
+
+            if ((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && arg.constructor === Object) {
+                for (var key in arg) {
+                    if (arg.hasOwnProperty(key)) {
+                        this.emitter.on(key, arg[key]);
+                    }
+                }
+            } else {
+                this.emitter.on.apply(this.emitter, args);
+            }
+
+            return this;
+        }
+    }, {
+        key: 'off',
+        value: function off() {
+            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                args[_key2] = arguments[_key2];
+            }
+
+            if (args.length === 0) {
+                this.emitter.removeAllListeners();
+            } else {
+                this.emitter.off.apply(this.emitter, args);
+            }
+
+            return this;
+        }
+    }, {
         key: 'start',
         value: function start() {
             var _this = this;
 
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-            var _options$duration = options.duration,
-                duration = _options$duration === undefined ? 0 : _options$duration,
-                _options$easing = options.easing,
-                easing = _options$easing === undefined ? _linear2.default : _options$easing,
-                _options$loop = options.loop,
-                loop = _options$loop === undefined ? false : _options$loop,
-                _options$reverse = options.reverse,
-                reverse = _options$reverse === undefined ? false : _options$reverse,
-                _options$start = options.start,
-                start = _options$start === undefined ? function () {} : _options$start,
-                _options$doing = options.doing,
-                doing = _options$doing === undefined ? function () {} : _options$doing,
-                _options$paused = options.paused,
-                paused = _options$paused === undefined ? function () {} : _options$paused,
-                _options$ended = options.ended,
-                ended = _options$ended === undefined ? function () {} : _options$ended,
-                _options$stopped = options.stopped,
-                stopped = _options$stopped === undefined ? function () {} : _options$stopped;
-
-
-            if (duration === 0 || this.status.isPlaying()) {
+            if (this.duration === 0 || this.status.isPlaying()) {
                 return;
             }
 
-            this.fnPaused = paused;
-            this.fnStopped = stopped;
-
-            var getNow = reverse ? function (time) {
-                return 1 - easing(time);
-            } : function (time) {
-                return 0 + easing(time);
+            var duration = this.duration;
+            var easing = this.reverse ? function (n) {
+                return 1 - _this.easing(n);
+            } : function (n) {
+                return 0 + _this.easing(n);
             };
-            var startTime = +new Date() - this.pastTime;
-            var stepping = function stepping() {
-                var pastTime = +new Date() - startTime;
+            var startTime = 0;
+
+            var stepping = function stepping(timestamp) {
+                if (!startTime) {
+                    startTime = timestamp - _this.pastTime;
+                }
+
+                var pastTime = timestamp - startTime;
                 var progress = pastTime / duration;
 
                 if (pastTime >= duration) {
-                    if (loop) {
-                        startTime = +new Date();
+                    if (_this.loop) {
+                        startTime = timestamp;
                     } else {
                         _this.pastTime = 0;
                         _this.rafId = 0;
                         _this.status.stop();
-
-                        ended();
+                        _this.emitter.emit('update', easing(1));
+                        _this.emitter.emit('ended');
 
                         return;
                     }
                 }
 
-                doing(getNow(progress));
+                _this.emitter.emit('update', easing(progress));
 
                 _this.pastTime = pastTime;
-                _this.rafId = (0, _raf2.default)(stepping);
+                _this.rafId = window.requestAnimationFrame(stepping);
             };
 
             this.status.play();
+            this.emitter.emit('start');
 
-            start();
-            stepping();
+            window.requestAnimationFrame(stepping);
         }
     }, {
         key: 'pause',
@@ -131,14 +152,11 @@ var Stepper = function () {
                 return;
             }
 
-            _raf2.default.cancel(this.rafId);
+            window.cancelAnimationFrame(this.rafId);
 
             this.rafId = 0;
             this.status.pause();
-
-            if (this.fnPaused) {
-                this.fnPaused();
-            }
+            this.emitter.emit('paused');
         }
     }, {
         key: 'stop',
@@ -147,15 +165,12 @@ var Stepper = function () {
                 return;
             }
 
-            _raf2.default.cancel(this.rafId);
+            window.cancelAnimationFrame(this.rafId);
 
             this.pastTime = 0;
             this.rafId = 0;
             this.status.stop();
-
-            if (this.fnStopped) {
-                this.fnStopped();
-            }
+            this.emitter.emit('stopped');
         }
     }]);
 
