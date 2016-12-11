@@ -1,4 +1,7 @@
 # StepperJS
+[![Build Status](https://travis-ci.org/UYEONG/stepperjs.svg?branch=master)](https://travis-ci.org/UYEONG/stepperjs)
+[![codecov](https://codecov.io/gh/UYEONG/stepperjs/graph/badge.svg?token=Eg1MUAW9he)](https://codecov.io/gh/UYEONG/stepperjs)
+
 
 A tiny requestAnimationFrame wrapper to improve usability.  - [Demo](https://uyeong.github.io/stepperjs/)
 

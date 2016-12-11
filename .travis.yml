@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - "7.1"
+  - "6.9"
+install:
+  - npm install
+script:
+  - npm test -- --browsers=PhantomJS
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
