@@ -44,7 +44,7 @@ for Browser
 
 ```js
 var Stepper = stepperjs.Stepper();
-var easings = stepperjs.easings();
+var easings = stepperjs.easings;
 var stepper = new Stepper({
     duration: 300,
     easing: easings.linear,
