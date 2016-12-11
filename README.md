@@ -18,9 +18,7 @@ for Babel
 import Stepper from 'stepperjs';
 import linear from 'stepperjs/dist/easings/linear';
 
-const stepper = new Stepper();
-
-stepper({
+const stepper = new Stepper({
     duration: 300, // default: 0
     easing: linear, // default: linear
     loop: true, // default: false
