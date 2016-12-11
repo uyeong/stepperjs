@@ -37,7 +37,7 @@ stepper.start();
 for Browser
 
 ```html
-<script type="text/javascript" src="stepperjs.browser-0.1.0.min.js"></script></head>
+<script type="text/javascript" src="stepperjs.browser-0.1.1.min.js"></script></head>
 ```
 
 ```js
