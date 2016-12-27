@@ -2,6 +2,8 @@ import EventEmitter3 from 'eventemitter3';
 import Status from './Status';
 import linear from './easings/linear';
 
+const root = typeof window === 'undefined' ? global : window;
+
 class Stepper {
     constructor(options = {}) {
         this.duration = options.duration || 0;
@@ -92,13 +94,13 @@ class Stepper {
             this.emitter.emit('update', easing(progress));
 
             this.pastTime = pastTime;
-            this.rafId = window.requestAnimationFrame(stepping);
+            this.rafId = root.requestAnimationFrame(stepping);
         };
 
         this.status.play();
         this.emitter.emit('start');
 
-        window.requestAnimationFrame(stepping);
+        root.requestAnimationFrame(stepping);
     }
 
     pause() {
