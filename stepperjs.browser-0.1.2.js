@@ -383,7 +383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 	
 	exports.__esModule = true;
 	
@@ -404,6 +404,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var root = typeof window === 'undefined' ? global : window;
 	
 	var Stepper = function () {
 	    function Stepper() {
@@ -513,13 +515,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.emitter.emit('update', easing(progress));
 	
 	            _this.pastTime = pastTime;
-	            _this.rafId = window.requestAnimationFrame(stepping);
+	            _this.rafId = root.requestAnimationFrame(stepping);
 	        };
 	
 	        this.status.play();
 	        this.emitter.emit('start');
 	
-	        window.requestAnimationFrame(stepping);
+	        root.requestAnimationFrame(stepping);
 	    };
 	
 	    Stepper.prototype.pause = function pause() {
@@ -551,6 +553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	exports['default'] = Stepper;
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 5 */
@@ -1465,4 +1468,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=stepperjs.browser-0.1.1.js.map
+//# sourceMappingURL=stepperjs.browser-0.1.2.js.map
