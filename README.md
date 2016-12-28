@@ -1,4 +1,7 @@
 # StepperJS
+[![Build Status](https://travis-ci.org/UYEONG/stepperjs.svg?branch=master)](https://travis-ci.org/UYEONG/stepperjs)
+[![codecov](https://codecov.io/gh/UYEONG/stepperjs/graph/badge.svg?token=Eg1MUAW9he)](https://codecov.io/gh/UYEONG/stepperjs)
+
 
 A tiny requestAnimationFrame wrapper to improve usability.  - [Demo](https://uyeong.github.io/stepperjs/)
 
@@ -18,9 +21,7 @@ for Babel
 import Stepper from 'stepperjs';
 import linear from 'stepperjs/dist/easings/linear';
 
-const stepper = new Stepper();
-
-stepper({
+const stepper = new Stepper({
     duration: 300, // default: 0
     easing: linear, // default: linear
     loop: true, // default: false
@@ -39,12 +40,12 @@ stepper.start();
 for Browser
 
 ```html
-<script type="text/javascript" src="stepperjs.browser-0.0.3.min.js"></script></head>
+<script type="text/javascript" src="stepperjs.browser-0.1.2.min.js"></script>
 ```
 
 ```js
 var Stepper = stepperjs.Stepper();
-var easings = stepperjs.easings();
+var easings = stepperjs.easings;
 var stepper = new Stepper({
     duration: 300,
     easing: easings.linear,
