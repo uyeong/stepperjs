@@ -16,8 +16,8 @@ describe('Test of the Stepper Class.', function() {
         window.cancelAnimationFrame.restore();
     });
 
-    describe('사용자는 Stepper 클래스의 새로운 인스턴스를 생성할 수 있다.', () => {
-        it('new 키워드로 인스턴스를 생성하면 새로운 인스턴스가 생성된다.', () => {
+    describe('The user should be able to make new instance of Stepper class.', () => {
+        it('should be made new instance.', () => {
             // Given
             // When
             const stepper = new Stepper();
@@ -27,7 +27,7 @@ describe('Test of the Stepper Class.', function() {
             assert.instanceOf(stepper, Stepper);
         });
 
-        it('옵션 인자를 생략하면 기본 옵션으로 설정된 인스턴스가 생성된다.', () => {
+        it('should be made new instance with default option as option value is omit.', () => {
             // Given
             // When
             const stepper = new Stepper();
@@ -39,7 +39,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isFalse(stepper.option('reverse'));
         });
 
-        it('옵션 인자를 전달하면 전달한 옵션으로 설정된 인스턴스가 생성된다.', () => {
+        it('should be made new instance with passed option as option value is passed.', () => {
             // Given
             const options = {
                 duration: 300,
@@ -59,8 +59,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 option() 메서드를 이용해 옵션 값을 변경할 수 있다.', () => {
-        it('옵션명과 값을 전달하면 지정한 옵션이 변경된다.', () => {
+    describe('The user should be able to change option values of stepper object.', () => {
+        it('should be changed separate option value.', () => {
             // Given
             const stepper = new Stepper({
                 duration: 300,
@@ -82,7 +82,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isFalse(stepper.option('reverse'));
         });
 
-        it('옵션명과 값 셋을 객체로 전달하면 여러개의 옵션이 일괄로 변경된다.', () => {
+        it('should be changed option values at a time.', () => {
             // Given
             const stepper = new Stepper();
 
@@ -102,8 +102,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 on() 메서드를 이용해 이벤트 리스너를 등록할 수 있다.', () => {
-        it('이벤트명과 리스너를 전달하면 지정한 이벤트 리스너가 등록된다.', () => {
+    describe('The user should be able to attach event listener with on method', () => {
+        it('should be attached event listener as passed event name and listner.', () => {
             // Given
             const onStart = sinon.spy();
             const onUpdate = sinon.spy();
@@ -121,7 +121,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isTrue(onUpdate.called);
         });
 
-        it('이벤트명과 리스너 셋을 객체로 전달하면 여러개의 이벤트 리스너가 등록된다.', () => {
+        it('should be attached event listeners at a time as passed object that consist of event name and listner.', () => {
             // Given
             const onStart = sinon.spy();
             const onUpdate = sinon.spy();
@@ -142,8 +142,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 off() 메서드를 이용해 이벤트 리스너를 해제할 수 있다.', () => {
-        it('이벤트명과 리스너를 전달하면 지정한 이벤트 리스너가 해제된다.', () => {
+    describe('The user should be able to detach event listener with off method.', () => {
+        it('should be detached event listener as passed event name and listner.', () => {
             // Given
             const onStart = sinon.spy();
             const onUpdate = sinon.spy();
@@ -164,7 +164,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isFalse(onUpdate.called);
         });
 
-        it('아무것도 전달하지 않으면 이벤트 리스너가 모두 해제된다.', () => {
+        it('should be detached all event listener as no arguments', () => {
             // Given
             const onStart = sinon.spy();
             const onUpdate = sinon.spy();
@@ -185,8 +185,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 start() 메서드를 이용해 progress 계산을 시작할 수 있다.', () => {
-        it('progress 계산이 시작되면 start 이벤트가 발생된다.', () => {
+    describe('The user should be able to start progress calculation with start method..', () => {
+        it('should fire start event, when progress calculation is started.', () => {
             // Given
             const onStart = sinon.spy();
             const stepper = new Stepper({duration: 300});
@@ -200,7 +200,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isTrue(onStart.called);
         });
 
-        it('duration을 1 이상 설정 했을 때만 progress 계산이 시작된다.', () => {
+        it('should start progress calculation, only that duration is more than 1.', () => {
             // Given
             const onStart2 = sinon.spy();
             const onStart1 = sinon.spy();
@@ -219,7 +219,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isFalse(onStart2.called);
         });
 
-        it('계산 중이 아닐 때만 progress 계산이 시작된다.', () => {
+        it('should start progress calculation, only that calculation is not processing.', () => {
             // Given
             const onStart = sinon.spy();
             const stepper = new Stepper({
@@ -237,7 +237,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onStart.callCount, 1);
         });
 
-        it('progress 값이 바뀔때마다 현재 progress 값과 함께 update 이벤트가 발생된다.', () => {
+        it('should fire update event with current value of progress whenever value of progress is changed.', () => {
             // Given
             const onUpdate = sinon.spy();
             const stepper = new Stepper({
@@ -259,7 +259,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), inBack(250 / 300).toFixed(2));
         });
 
-        it('reverse 옵션을 true로 설정하면 progress 값이 거꾸로 계산된다.', () => {
+        it('should calculate backwards, if value of reverse option is true.', () => {
             // Given
             const onUpdate = sinon.spy();
             const stepper = new Stepper({
@@ -282,7 +282,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), (1 - inBack(250 / 300)).toFixed(2));
         });
 
-        it('loop 옵션을 true로 설정하면 progress 계산이 반복된다.', () => {
+        it('should repeat progress calculation, if loop option is true.', () => {
             const onUpdate = sinon.spy();
             const onEneded = sinon.spy();
             const stepper = new Stepper({
@@ -318,7 +318,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[4][0].toFixed(2), linear(150 / 300).toFixed(2));
         });
 
-        it('progress 계산이 끝나면 ended 이벤트가 발생된다.', () => {
+        it('should fire ended event, if progress calculation is finished.', () => {
             // Given
             const onEnded = sinon.spy();
             const stepper = new Stepper({duration: 300});
@@ -335,7 +335,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isTrue(onEnded.called);
         });
 
-        it('progress 계산이 끝나면 더이상 update 이벤트가 발생하지 않는다.', () => {
+        it('should not fire update event, if progress calculation is finished.', () => {
             // Given
             const onUpdate = sinon.spy();
             const onEnded = sinon.spy();
@@ -363,8 +363,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 pause() 메서드를 이용해 progress 계산을 일시 정지할 수 있다.', () => {
-        it('progress 계산이 일시 정지 되면 paused 이벤트가 발생된다.', () => {
+    describe('The user should be able to pause progress calculation with pause method.', () => {
+        it('should fire paused event, when progress calculation is pause.', () => {
             const onPaused = sinon.spy();
             const stepper = new Stepper({duration: 300});
 
@@ -384,7 +384,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isTrue(onPaused.called);
         });
 
-        it('일시 정지 상태가 아닐 때만 progress 계산이 일시 정지된다.', () => {
+        it('should be paused progress calculation, only that calculation state is not pause.', () => {
             const onPaused = sinon.spy();
             const stepper = new Stepper({duration: 300});
 
@@ -406,7 +406,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onPaused.callCount, 1);
         });
 
-        it('progress 계산이 일시 정지되면 update 이벤트가 발생하지 않는다.', () => {
+        it('should not fire update event, if progress calculation is paused.', () => {
             const onUpdate = sinon.spy();
             const onPaused = sinon.spy();
             const stepper = new Stepper({duration: 300});
@@ -434,7 +434,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), linear(250 / 300).toFixed(2));
         });
 
-        it('일시 정지 상태에서 play() 메서드를 호출하면 progress 계산이 이어서 시작된다.', () => {
+        it('should continue progress calculation, if play method is called in pause state.', () => {
             const onUpdate = sinon.spy();
             const onPaused = sinon.spy();
             const onEnded = sinon.spy();
@@ -467,8 +467,8 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
-    describe('사용자는 stepper 객체의 stop() 메서드를 이용해 progress 계산을 중지할 수 있다.', () => {
-        it('progress 계산이 중지되면 stoped 이벤트가 발생된다.', () => {
+    describe('The user should be able to stop progress calculation with stop method.', () => {
+        it('should fire stopped event, when progress calculation is stopped.', () => {
             const onStopped = sinon.spy();
             const stepper = new Stepper({duration: 300});
 
@@ -488,7 +488,7 @@ describe('Test of the Stepper Class.', function() {
             assert.isTrue(onStopped.called);
         });
 
-        it('중지 상태가 아닐 때만 progress 계산이 중지된다.', () => {
+        it('should stop progress calculation, only that calculation state is not stop.', () => {
             const onStopped = sinon.spy();
             const stepper = new Stepper({duration: 300});
 
@@ -510,7 +510,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onStopped.callCount, 1);
         });
 
-        it('progress 계산이 중지되면 더이상 update 이벤트가 발생하지 않는다.', () => {
+        it('should not fire update event, if progress calculation is stopped.', () => {
             const onUpdate = sinon.spy();
             const onStopped = sinon.spy();
             const stepper = new Stepper({duration: 300});
@@ -538,7 +538,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), linear(250 / 300).toFixed(2));
         });
 
-        it('일시 중지 상태에서 stop() 메서드를 호출하면 계산이 중지된다.', () => {
+        it('should stop progress calculation, if stop method is called in pause state.', () => {
             const onUpdate = sinon.spy();
             const onPaused = sinon.spy();
             const onStopped = sinon.spy();
@@ -569,8 +569,7 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[0][0], 0);
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), linear(250 / 300).toFixed(2));
         });
-
-        it('중지 상태에서 play() 메서드를 호출하면 progress 계산이 처음부터 시작된다.', () => {
+        it('should start progress calculation from the first, if play method is called in stop state.', () => {
             const onUpdate = sinon.spy();
             const onStopped = sinon.spy();
             const stepper = new Stepper({duration: 300});
