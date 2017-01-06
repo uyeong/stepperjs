@@ -15,7 +15,7 @@ $ npm install --save stepperjs
 
 ### Usage
 
-for Babel
+#### for Babel
 
 ```js
 import Stepper from 'stepperjs';
@@ -37,7 +37,48 @@ const stepper = new Stepper({
 stepper.start();
 ```
 
-for Browser
+If you want to change options after creating the object
+
+```js
+const stepper = new Stepper();
+
+stepper.option('duration', 500);
+stepper.option('easing', linear);
+stepper.option('loop', false);
+stepper.option('reverse', false);
+
+// or
+
+stepper.option({
+    duration: 500,
+    easing: linear,
+    loop: false,
+    reverse: false
+});
+
+```
+
+If you want to use multiple easing function.
+
+```js
+import Stepper from 'stepperjs';
+import linear from 'stepperjs/dist/easings/linear';
+import inBack from 'stepperjs/dist/easings/inBack';
+
+const stepper = new Stepper({
+    duration: 300,
+    easing: [linear, inBack]
+}).on({
+    update: (n1, n2) => {
+        console.log(n1); // value of linear
+        console.log(n2); // value of inBack
+    }
+});
+
+stepper.start();
+```
+
+#### for Browser
 
 ```html
 <script type="text/javascript" src="stepperjs.browser-0.1.2.min.js"></script>
