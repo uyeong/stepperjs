@@ -4,6 +4,22 @@ import linear from './easings/linear';
 
 const root = typeof window === 'undefined' ? global : window;
 
+function blender(easing, reverse) {
+    if (typeof easing === 'function') {
+        return (t) => [reverse ? 1 - easing(t) : 0 + easing(t)];
+    }
+
+    return (t) => {
+        const result = [];
+
+        for(let i = 0, n = easing.length; i < n; i++) {
+            result.push(reverse ? 1 - easing[i](t) : 0 + easing[i](t));
+        }
+
+        return result;
+    }
+}
+
 class Stepper {
     constructor(options = {}) {
         this.duration = options.duration || 0;
@@ -66,7 +82,7 @@ class Stepper {
         }
 
         const duration = this.duration;
-        const easing = this.reverse? (n) => 1 - this.easing(n) : (n) => 0 + this.easing(n);
+        const blend = blender(this.easing, this.reverse);
         let startTime = 0;
 
         const stepping = (timestamp) => {
@@ -84,14 +100,14 @@ class Stepper {
                     this.pastTime = 0;
                     this.rafId = 0;
                     this.status.stop();
-                    this.emitter.emit('update', easing(1));
+                    this.emitter.emit.apply(this.emitter, ['update'].concat(blend(1)));
                     this.emitter.emit('ended');
 
                     return;
                 }
             }
 
-            this.emitter.emit('update', easing(progress));
+            this.emitter.emit.apply(this.emitter, ['update'].concat(blend(progress)));
 
             this.pastTime = pastTime;
             this.rafId = root.requestAnimationFrame(stepping);

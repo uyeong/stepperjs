@@ -259,6 +259,30 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[1][0].toFixed(2), inBack(250 / 300).toFixed(2));
         });
 
+        it('should fire update event with each current value as  multiple easing functions are passed to array', () => {
+            // Given
+            const onUpdate = sinon.spy();
+            const stepper = new Stepper({
+                duration: 300,
+                easing: [linear, inBack]
+            });
+
+            stepper.on('update', onUpdate);
+
+            // When
+            stepper.start();
+
+            this.rafStub.step(1, 0);
+            this.rafStub.step(1, 250);
+
+            // Then
+            assert.strictEqual(onUpdate.callCount, 2);
+            assert.strictEqual(onUpdate.args[0][0], 0);
+            assert.strictEqual(onUpdate.args[1][0].toFixed(2), '0.83');
+            assert.strictEqual(onUpdate.args[0][1], 0);
+            assert.strictEqual(onUpdate.args[1][1].toFixed(2), inBack(250 / 300).toFixed(2));
+        });
+
         it('should calculate backwards, if value of reverse option is true.', () => {
             // Given
             const onUpdate = sinon.spy();
