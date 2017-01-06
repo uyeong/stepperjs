@@ -407,6 +407,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var root = typeof window === 'undefined' ? global : window;
 	
+	function blender(easing, reverse) {
+	    if (typeof easing === 'function') {
+	        return function (t) {
+	            return [reverse ? 1 - easing(t) : 0 + easing(t)];
+	        };
+	    }
+	
+	    return function (t) {
+	        var result = [];
+	
+	        for (var i = 0, n = easing.length; i < n; i++) {
+	            result.push(reverse ? 1 - easing[i](t) : 0 + easing[i](t));
+	        }
+	
+	        return result;
+	    };
+	}
+	
 	var Stepper = function () {
 	    function Stepper() {
 	        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -483,11 +501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        var duration = this.duration;
-	        var easing = this.reverse ? function (n) {
-	            return 1 - _this.easing(n);
-	        } : function (n) {
-	            return 0 + _this.easing(n);
-	        };
+	        var blend = blender(this.easing, this.reverse);
 	        var startTime = 0;
 	
 	        var stepping = function stepping(timestamp) {
@@ -505,14 +519,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    _this.pastTime = 0;
 	                    _this.rafId = 0;
 	                    _this.status.stop();
-	                    _this.emitter.emit('update', easing(1));
+	                    _this.emitter.emit.apply(_this.emitter, ['update'].concat(blend(1)));
 	                    _this.emitter.emit('ended');
 	
 	                    return;
 	                }
 	            }
 	
-	            _this.emitter.emit('update', easing(progress));
+	            _this.emitter.emit.apply(_this.emitter, ['update'].concat(blend(progress)));
 	
 	            _this.pastTime = pastTime;
 	            _this.rafId = root.requestAnimationFrame(stepping);
@@ -1468,4 +1482,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ])
 });
 ;
-//# sourceMappingURL=stepperjs.browser-0.1.2.js.map
+//# sourceMappingURL=stepperjs.browser-0.1.3.js.map
