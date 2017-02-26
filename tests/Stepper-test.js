@@ -1,4 +1,4 @@
-import createStub from 'raf-stub';
+import createStub from 'raf-stub/lib';
 import Stepper from '../src/Stepper';
 import linear from '../src/easings/linear';
 import inBack from '../src/easings/inBack';

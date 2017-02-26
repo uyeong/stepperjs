@@ -2,7 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const pkg = require('./package.json');
-
 const {name, version} = pkg;
 const PROD = process.env.NODE_ENV === 'production';
 const plugins = [];
@@ -24,11 +23,11 @@ if (PROD) {
 module.exports = {
     devtool: 'source-map',
     entry: {
-        app: './src/browser.js'
+        [`${name}.browser-${version}${PROD ? '.min' : ''}`]: './src/browser.js'
     },
     output: {
         path: path.resolve(__filename, '../dist'),
-        filename: `${name}.browser-${version}${PROD ? '.min' : ''}.js`,
+        filename: '[name].js',
         library: name,
         libraryTarget: 'umd'
     },
@@ -39,29 +38,32 @@ module.exports = {
         }),
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: `"${process.env.NODE_ENV}"`,
-                BROWSER: true
+                NODE_ENV: `"${process.env.NODE_ENV}"`
             },
         })
     ]),
     module: {
-        loaders: [{
-            test: /.js?$/,
+        rules: [{
+            test: /(\.js)$/,
             loader: 'babel-loader',
             exclude: /node_modules/,
-            query: {
-                presets: ['es2015-loose'],
+            options: {
+                presets: [
+                    ['es2015', {loose: true}]
+                ],
                 plugins: [
                     'transform-class-properties',
                     'transform-es3-member-expression-literals',
                     'transform-es3-property-literals'
                 ],
+                comments: false,
                 cacheDirectory: true
             }
         }]
     },
     devServer: {
         port: 8080,
-        colors: true
+        contentBase: path.resolve(__filename, '../dist'),
+        noInfo: true
     }
 };

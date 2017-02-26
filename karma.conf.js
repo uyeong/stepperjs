@@ -1,42 +1,34 @@
 // Karma configuration
 // Generated on Tue Nov 08 2016 18:07:40 GMT+0900 (KST)
 
+const path = require('path');
 const webpack = require('./webpack.config.js');
 
-webpack.entry = null;
-webpack.output = null;
+webpack.devtool = 'inline-source-map';
 
 module.exports = function(config) {
-  let coverageReporter = {};
+  let coverageIstanbulReporter = {};
   const reporters = ['spec'];
 
   if (config.coverage) {
-    coverageReporter = {
+    webpack.module.rules.push({
+        test: /\.js$/,
+        enforce: 'post',
+        include: path.resolve('src/'),
+        loader: 'istanbul-instrumenter-loader'
+    });
+
+    coverageIstanbulReporter = {
       dir: '.reports',
-      reporters: [
-        {type: 'html', subdir: 'report-html'},
-        {type: 'lcov', subdir: 'report-lcov'},
-        {type: 'cobertura', subdir: '.', file: 'cobertura.xml'}
-      ]
+      reports: ['html', 'lcov', 'cobertura'],
+        fixWebpackSourcePaths: true,
+        'report-config': {
+          html: {subdir: 'html-report'},
+          cobertura: {file: 'cobertura.xml'}
+        }
     };
 
-    webpack.isparta = {
-      embedSource: true,
-      noAutoWrap: true,
-      babel: {
-        presets: ['es2015']
-      }
-    };
-
-    webpack.module.preLoaders = [
-      {
-        test: /(\.js)$/,
-        exclude: /(tests|node_modules)/,
-        loader: 'isparta'
-      }
-    ];
-
-    reporters.push('coverage');
+    reporters.push('coverage-istanbul');
   }
 
   config.set({
@@ -52,7 +44,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'tests/**/*-test.js',
+      'tests/test-entry.js',
       './node_modules/phantomjs-polyfill-find-index/findIndex-polyfill.js'
     ],
 
@@ -64,7 +56,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      './tests/**/*-test.js': ['webpack']
+      './tests/test-entry.js': ['webpack', 'sourcemap']
     },
 
 
@@ -74,7 +66,7 @@ module.exports = function(config) {
     reporters,
 
 
-    coverageReporter,
+    coverageIstanbulReporter,
 
 
     webpack,
