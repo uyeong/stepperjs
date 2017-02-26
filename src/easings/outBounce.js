@@ -10,4 +10,4 @@ function outBounce(n) {
     }
 }
 
-module.exports = outBounce;
+export default outBounce;

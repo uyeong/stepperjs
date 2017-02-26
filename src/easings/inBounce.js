@@ -4,4 +4,4 @@ function inBounce(n) {
     return 1 - outBounce(1 - n);
 }
 
-module.exports = inBounce;
+export default inBounce;

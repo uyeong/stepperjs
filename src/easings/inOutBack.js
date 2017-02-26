@@ -8,4 +8,4 @@ function inOutBack(n) {
     return 0.5 * ((n -= 2) * n * ((s + 1) * n + s) + 2);
 }
 
-module.exports = inOutBack;
+export default inOutBack;

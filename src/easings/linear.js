@@ -2,4 +2,4 @@ function linear(n) {
     return n;
 }
 
-module.exports = linear;
+export default linear;

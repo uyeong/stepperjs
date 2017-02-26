@@ -22,4 +22,4 @@ function inOutElastic(n) {
     return a * Math.pow(2, -10 * (n -= 1)) * Math.sin((n - s) * (2 * Math.PI) / p) * 0.5 + 1;
 }
 
-module.exports = inOutElastic;
+export default inOutElastic;

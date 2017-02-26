@@ -2,4 +2,4 @@ function inQuad(n) {
     return n * n;
 }
 
-module.exports = inQuad;
+export default inQuad;

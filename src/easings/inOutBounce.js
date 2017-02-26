@@ -9,4 +9,4 @@ function inOutBounce(n) {
     return outBounce(n * 2 - 1) * .5 + .5;
 }
 
-module.exports = inOutBounce;
+export default inOutBounce;

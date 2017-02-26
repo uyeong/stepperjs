@@ -7,4 +7,4 @@ function inOutCirc(n) {
     return 0.5 * (Math.sqrt(1 - (n -= 2) * n) + 1);
 }
 
-module.exports = inOutCirc;
+export default inOutCirc;

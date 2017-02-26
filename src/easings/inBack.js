@@ -4,4 +4,4 @@ function inBack(n) {
     return n * n * (( s + 1 ) * n - s);
 }
 
-module.exports = inBack;
+export default inBack;

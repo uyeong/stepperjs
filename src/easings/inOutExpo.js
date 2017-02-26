@@ -10,4 +10,4 @@ function inOutExpo(n) {
     return .5 * (-Math.pow(2, -10 * (n - 1)) + 2);
 }
 
-module.exports = inOutExpo;
+export default inOutExpo;

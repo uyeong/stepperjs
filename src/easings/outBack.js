@@ -4,4 +4,4 @@ function outBack(n) {
     return --n * n * ((s + 1) * n + s) + 1;
 }
 
-module.exports = outBack;
+export default outBack;

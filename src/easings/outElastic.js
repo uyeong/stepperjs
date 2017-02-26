@@ -19,4 +19,4 @@ function outElastic(n) {
     return (a * Math.pow(2, - 10 * n) * Math.sin((n - s) * (2 * Math.PI) / p) + 1);
 }
 
-module.exports = outElastic;
+export default outElastic;

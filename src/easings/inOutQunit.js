@@ -8,4 +8,4 @@ function inOutQuint(n) {
     return 0.5 * ((n -= 2) * n * n * n * n + 2);
 }
 
-module.exports = inOutQuint;
+export default inOutQuint;

@@ -8,4 +8,4 @@ function inOutQuad(n) {
     return - 0.5 * (--n * (n - 2) - 1);
 }
 
-module.exports = inOutQuad;
+export default inOutQuad;

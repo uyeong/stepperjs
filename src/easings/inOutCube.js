@@ -8,4 +8,4 @@ function inOutCube(n) {
     return 0.5 * ((n -= 2 ) * n * n + 2);
 }
 
-module.exports = inOutCube;
+export default inOutCube;
