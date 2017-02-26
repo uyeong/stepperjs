@@ -107,8 +107,6 @@ describe('Test of the Easing functions.', function() {
         });
 
         it('should be able to know the current progress through outCirc()', () => {
-            let v = .5;
-
             assert.equal(easings.outCirc(.5).toFixed(2), .87);
         });
 
