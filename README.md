@@ -27,11 +27,11 @@ const stepper = new Stepper({
     loop: true, // default: false
     reverse: true // default: false
 }).on({
-    start: () => ... ,
-    update: (n) => ... ,
-    paused: () => ... ,
-    ended: () => ... ,
-    stopped: () => ...
+    start() { ... },
+    update(n) { ... },
+    paused() { ... },
+    ended() { ... },
+    stopped() { ... }
 });
 
 stepper.start();
