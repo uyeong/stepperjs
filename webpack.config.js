@@ -9,19 +9,19 @@ const plugins = [];
 if (PROD) {
     plugins.push(new webpack.optimize.UglifyJsPlugin({
         sourceMap: false,
-        mangle: false,
         compress: {
             warnings: false,
             screw_ie8: false,
         },
         output: {
-            comments: false
+            comments: false,
+            screw_ie8: false
         }
     }));
 }
 
 module.exports = {
-    devtool: 'source-map',
+    devtool: !PROD ? 'source-map' : '',
     entry: {
         [`${name}.browser-${version}${PROD ? '.min' : ''}`]: './src/browser.js'
     },
@@ -49,7 +49,7 @@ module.exports = {
             exclude: /node_modules/,
             options: {
                 presets: [
-                    ['es2015', {loose: true}]
+                    ['es2015', {loose: true, modules: 'commonjs'}]
                 ],
                 plugins: [
                     'transform-class-properties',
