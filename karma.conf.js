@@ -44,8 +44,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'tests/test-entry.js',
-      './node_modules/phantomjs-polyfill-find-index/findIndex-polyfill.js'
+      'tests/test-entry.js'
     ],
 
 
@@ -91,7 +90,20 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Firefox', 'PhantomJS'],
+    browsers: ['Chrome', 'Firefox', 'ChromeCanaryHeadless'],
+
+
+    customLaunchers: {
+      ChromeCanaryHeadless: {
+        base: 'ChromeCanary',
+        flags: [
+          '--no-sandbox',
+          '--headless',
+          '--disable-gpu',
+          '--remote-debugging-port=9222',
+        ]
+      }
+    },
 
 
     // Continuous Integration mode
