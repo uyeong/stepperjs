@@ -7,8 +7,8 @@ describe('Test of the Stepper Class.', function() {
     beforeEach(() => {
         this.rafStub = createStub();
 
-        sinon.stub(window, 'requestAnimationFrame', this.rafStub.add);
-        sinon.stub(window, 'cancelAnimationFrame', this.rafStub.remove);
+        sinon.stub(window, 'requestAnimationFrame').callsFake(this.rafStub.add);
+        sinon.stub(window, 'cancelAnimationFrame').callsFake(this.rafStub.remove);
     });
 
     afterEach(() => {
