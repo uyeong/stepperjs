@@ -91,23 +91,23 @@ class Stepper {
             }
 
             const pastTime = timestamp - startTime;
-            let progress = pastTime / duration;
+            const progress = pastTime / duration;
 
             if (pastTime >= duration) {
+                this.emitter.emit('update', blend(1));
+
                 if (this.loop) {
                     startTime = timestamp;
                 } else {
                     this.pastTime = 0;
                     this.rafId = 0;
                     this.status.stop();
-                    this.emitter.emit.apply(this.emitter, ['update'].concat(blend(1)));
                     this.emitter.emit('ended');
-
                     return;
                 }
+            } else {
+                this.emitter.emit('update', blend(progress));
             }
-
-            this.emitter.emit.apply(this.emitter, ['update'].concat(blend(progress)));
 
             this.pastTime = pastTime;
             this.rafId = root.requestAnimationFrame(stepping);
