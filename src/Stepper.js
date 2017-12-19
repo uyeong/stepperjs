@@ -94,7 +94,7 @@ class Stepper {
             const progress = pastTime / duration;
 
             if (pastTime >= duration) {
-                this.emitter.emit('update', blend(1));
+                this.emitter.emit.apply(this.emitter, ['update'].concat(blend(1)));
 
                 if (this.loop) {
                     startTime = timestamp;
@@ -106,7 +106,7 @@ class Stepper {
                     return;
                 }
             } else {
-                this.emitter.emit('update', blend(progress));
+                this.emitter.emit.apply(this.emitter, ['update'].concat(blend(progress)));
             }
 
             this.pastTime = pastTime;
