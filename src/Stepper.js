@@ -61,7 +61,7 @@ class Stepper {
                 }
             }
         } else {
-            this.emitter.on.apply(this.emitter, args);
+            this.emitter.on(...args);
         }
 
         return this;
@@ -93,7 +93,7 @@ class Stepper {
         if (args.length === 0) {
             this.emitter.removeAllListeners();
         } else {
-            this.emitter.off.apply(this.emitter, args);
+            this.emitter.off(...args);
         }
 
         return this;
@@ -117,7 +117,7 @@ class Stepper {
             const progress = pastTime / duration;
 
             if (pastTime >= duration) {
-                this.emitter.emit.apply(this.emitter, ['update'].concat(blend(1)));
+                this.emitter.emit(...['update'].concat(blend(1)));
 
                 if (this.loop) {
                     startTime = timestamp;
@@ -134,7 +134,7 @@ class Stepper {
                     return;
                 }
             } else {
-                this.emitter.emit.apply(this.emitter, ['update'].concat(blend(progress)));
+                this.emitter.emit(...['update'].concat(blend(progress)));
             }
 
             this.pastTime = pastTime;
