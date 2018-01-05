@@ -81,7 +81,7 @@ stepper.start();
 #### for Browser
 
 ```html
-<script type="text/javascript" src="stepperjs.browser-0.2.0.min.js"></script>
+<script type="text/javascript" src="stepperjs.browser-0.2.1.min.js"></script>
 ```
 
 ```js
