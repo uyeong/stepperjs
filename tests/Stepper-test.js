@@ -316,7 +316,7 @@ describe('Test of the Stepper Class.', function() {
 
             stepper.on({
                 update: onUpdate,
-                ended: onEneded
+                done: onEneded
             });
 
             // When
@@ -342,12 +342,12 @@ describe('Test of the Stepper Class.', function() {
             assert.strictEqual(onUpdate.args[4][0].toFixed(2), linear(150 / 300).toFixed(2));
         });
 
-        it('should fire ended event, if progress calculation is finished.', () => {
+        it('should fire done event, if progress calculation is finished.', () => {
             // Given
             const onEnded = sinon.spy();
             const stepper = new Stepper({duration: 300});
 
-            stepper.on('ended', onEnded);
+            stepper.on('done', onEnded);
 
             // When
             stepper.start();
@@ -366,7 +366,7 @@ describe('Test of the Stepper Class.', function() {
             const stepper = new Stepper({duration: 300});
 
             stepper.on('update', onUpdate);
-            stepper.on('ended', onEnded);
+            stepper.on('done', onEnded);
 
             // When
             stepper.start();
@@ -467,7 +467,7 @@ describe('Test of the Stepper Class.', function() {
             stepper.on({
                 update: onUpdate,
                 paused: onPaused,
-                ended: onEnded
+                done: onEnded
             });
 
             // Then

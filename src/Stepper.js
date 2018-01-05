@@ -102,7 +102,7 @@ class Stepper {
                     this.pastTime = 0;
                     this.rafId = 0;
                     this.status.stop();
-                    this.emitter.emit('ended');
+                    this.emitter.emit('done');
                     return;
                 }
             } else {
