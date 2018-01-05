@@ -101,10 +101,31 @@ var Stepper = function () {
             return this;
         }
     }, {
-        key: 'off',
-        value: function off() {
+        key: 'once',
+        value: function once() {
             for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
                 args[_key2] = arguments[_key2];
+            }
+
+            var arg = args[0];
+
+            if ((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && arg.constructor === Object) {
+                for (var key in arg) {
+                    if (arg.hasOwnProperty(key)) {
+                        this.emitter.once(key, arg[key]);
+                    }
+                }
+            } else {
+                this.emitter.once.apply(this.emitter, args);
+            }
+
+            return this;
+        }
+    }, {
+        key: 'off',
+        value: function off() {
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                args[_key3] = arguments[_key3];
             }
 
             if (args.length === 0) {
@@ -145,7 +166,7 @@ var Stepper = function () {
                         _this.pastTime = 0;
                         _this.rafId = 0;
                         _this.status.stop();
-                        _this.emitter.emit('ended');
+                        _this.emitter.emit('done');
                         return;
                     }
                 } else {
