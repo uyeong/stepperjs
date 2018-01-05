@@ -181,26 +181,53 @@ describe('Test of the Stepper Class.', function() {
         assert.isTrue(onUpdate.called);
       });
 
-      it('should be detached after function call', () => {
+      it('should be detach after function call', () => {
         // Given
         const onStart = sinon.spy();
-        const onUpdate = sinon.spy();
+        const onDone = sinon.spy();
         const stepper = new Stepper();
 
         // When
         stepper.once({
           start: onStart,
-          update: onUpdate
+          done: onDone
         });
 
         stepper.emitter.emit('start');
         stepper.emitter.emit('start');
-        stepper.emitter.emit('update');
-        stepper.emitter.emit('update');
+        stepper.emitter.emit('done');
+        stepper.emitter.emit('done');
 
         // Then
         assert.equal(onStart.callCount, 1);
-        assert.equal(onUpdate.callCount, 1);
+        assert.equal(onDone.callCount, 1);
+      });
+
+      it('should be detach update event after done.', () => {
+        // Given
+        const onUpdate = sinon.spy();
+        const onDone = sinon.spy();
+        const stepper = new Stepper({duration: 300});
+
+        // When
+        stepper.once('update', onUpdate);
+        stepper.on('done', onDone);
+
+        // First time
+        stepper.start();
+        this.rafStub.step(1, 0);
+        this.rafStub.step(1, 250);
+        this.rafStub.step(1, 301);
+
+        // Second time
+        stepper.start();
+        this.rafStub.step(1, 0);
+        this.rafStub.step(1, 250);
+        this.rafStub.step(1, 301);
+
+        // Then
+        assert.equal(onUpdate.callCount, 3);
+        assert.equal(onDone.callCount, 2);
       });
     });
 

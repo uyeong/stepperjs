@@ -26,6 +26,7 @@ class Stepper {
         this.easing = options.easing || linear;
         this.loop = options.loop || false;
         this.reverse = options.reverse || false;
+        this.onceUpdate = [];
         this.emitter = new EventEmitter3();
         this.status = new Status();
         this.pastTime = 0;
@@ -67,19 +68,25 @@ class Stepper {
     }
 
     once(...args) {
-      const arg = args[0];
+        const arg = args[0];
 
-      if (typeof arg === 'object' && arg.constructor === Object) {
-        for (let key in arg) {
-          if (arg.hasOwnProperty(key)) {
-            this.emitter.once(key, arg[key]);
-          }
+        if (typeof arg === 'object' && arg.constructor === Object) {
+            for (let key in arg) {
+                if (arg.hasOwnProperty(key)) {
+                this.emitter[key === 'update' ? 'on' : 'once'](key, arg[key]);
+                    if (key === 'update') {
+                        this.onceUpdate.push([key, arg[key]]);
+                    }
+                }
+            }
+        } else {
+            this.emitter[arg === 'update' ? 'on' : 'once'](...args);
+            if (arg === 'update') {
+                this.onceUpdate.push(args);
+            }
         }
-      } else {
-        this.emitter.once.apply(this.emitter, args);
-      }
 
-      return this;
+        return this;
     }
 
     off(...args) {
@@ -119,6 +126,11 @@ class Stepper {
                     this.rafId = 0;
                     this.status.stop();
                     this.emitter.emit('done');
+                    if (this.onceUpdate.length > 0) {
+                        for(let i = 0, n = this.onceUpdate.length; i < n; i++) {
+                            this.off(...this.onceUpdate.pop());
+                        }
+                    }
                     return;
                 }
             } else {
