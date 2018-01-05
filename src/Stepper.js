@@ -66,6 +66,22 @@ class Stepper {
         return this;
     }
 
+    once(...args) {
+      const arg = args[0];
+
+      if (typeof arg === 'object' && arg.constructor === Object) {
+        for (let key in arg) {
+          if (arg.hasOwnProperty(key)) {
+            this.emitter.once(key, arg[key]);
+          }
+        }
+      } else {
+        this.emitter.once.apply(this.emitter, args);
+      }
+
+      return this;
+    }
+
     off(...args) {
         if (args.length === 0) {
             this.emitter.removeAllListeners();

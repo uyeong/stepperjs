@@ -142,6 +142,68 @@ describe('Test of the Stepper Class.', function() {
         });
     });
 
+    describe('The user should be able to attach event listener with once method', () => {
+        it('should be attached event listener as passed event name and listener.', () => {
+          // Given
+          const onStart = sinon.spy();
+          const onUpdate = sinon.spy();
+          const stepper = new Stepper();
+
+          // When
+          stepper.once('start', onStart);
+          stepper.once('update', onUpdate);
+
+          stepper.emitter.emit('start');
+          stepper.emitter.emit('update');
+
+          // Then
+          assert.isTrue(onStart.called);
+          assert.isTrue(onUpdate.called);
+        });
+
+      it('should be attached event listeners at a time as passed object that consist of event name and listner.', () => {
+        // Given
+        const onStart = sinon.spy();
+        const onUpdate = sinon.spy();
+        const stepper = new Stepper();
+
+        // When
+        stepper.once({
+          start: onStart,
+          update: onUpdate
+        });
+
+        stepper.emitter.emit('start');
+        stepper.emitter.emit('update');
+
+        // Then
+        assert.isTrue(onStart.called);
+        assert.isTrue(onUpdate.called);
+      });
+
+      it('should be detached after function call', () => {
+        // Given
+        const onStart = sinon.spy();
+        const onUpdate = sinon.spy();
+        const stepper = new Stepper();
+
+        // When
+        stepper.once({
+          start: onStart,
+          update: onUpdate
+        });
+
+        stepper.emitter.emit('start');
+        stepper.emitter.emit('start');
+        stepper.emitter.emit('update');
+        stepper.emitter.emit('update');
+
+        // Then
+        assert.equal(onStart.callCount, 1);
+        assert.equal(onUpdate.callCount, 1);
+      });
+    });
+
     describe('The user should be able to detach event listener with off method.', () => {
         it('should be detached event listener as passed event name and listner.', () => {
             // Given
