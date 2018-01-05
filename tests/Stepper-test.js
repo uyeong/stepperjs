@@ -103,7 +103,7 @@ describe('Test of the Stepper Class.', function() {
     });
 
     describe('The user should be able to attach event listener with on method', () => {
-        it('should be attached event listener as passed event name and listner.', () => {
+        it('should be attached event listener as passed event name and listener.', () => {
             // Given
             const onStart = sinon.spy();
             const onUpdate = sinon.spy();
