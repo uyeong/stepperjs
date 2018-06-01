@@ -30,7 +30,7 @@ const stepper = new Stepper({
     start() { ... },
     update(n) { ... },
     paused() { ... },
-    ended() { ... },
+    done() { ... },
     stopped() { ... }
 });
 
@@ -96,7 +96,7 @@ var stepper = new Stepper({
     start: function () { ... },
     update: function (n) { ... },
     paused: function () { ... },
-    ended: function () { ... },
+    done: function () { ... },
     stopped: function () { ... }
 });
 
